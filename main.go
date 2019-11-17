@@ -7,7 +7,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-
+	"os"
+	
 	"github.com/andrewesteves/tapagguapi/models"
 	"github.com/andrewesteves/tapagguapi/transformations"
 )
@@ -24,7 +25,11 @@ func main() {
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(transformations.ReceiptToJSON(receipt))
 	})
-	log.Fatal(http.ListenAndServe(":9090", nil))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8000" //localhost
+	}
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
 func getURL(url string) ([]byte, error) {
