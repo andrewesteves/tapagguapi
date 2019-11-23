@@ -3,12 +3,12 @@ package model
 import "time"
 
 type Item struct {
-	Receipt   Receipt
-	Title     string
-	Price     float64
-	Qty       float64
-	Total     float64
-	Tax       float64
+	Title     string  `json:"title" xml:"prod>xProd"`
+	Price     float64 `json:"price" xml:"prod>vUnCom"`
+	Qty       float64 `json:"quantity" xml:"prod>qCom"`
+	Total     float64 `json:"total" xml:"prod>vProd"`
+	Tax       float64 `json:"tax" xml:"imposto>vTotTrib"`
+	Measure   string  `json:"measure" xml:"prod>uCom"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

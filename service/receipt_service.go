@@ -14,21 +14,41 @@ func NewReceiptService(rs repository.ReceiptContractRepository) ReceiptContractS
 }
 
 func (r ReceiptService) All() ([]model.Receipt, error) {
-	return []model.Receipt{}, nil
+	receipts, err := r.receiptRepository.All()
+	if err != nil {
+		return nil, err
+	}
+	return receipts, nil
 }
 
-func (r ReceiptService) Find() (model.Receipt, error) {
-	return model.Receipt{}, nil
+func (r ReceiptService) Find(id int64) (model.Receipt, error) {
+	receipt, err := r.receiptRepository.Find(id)
+	if err != nil {
+		return model.Receipt{}, err
+	}
+	return receipt, nil
 }
 
 func (r ReceiptService) Store(receipt model.Receipt) (model.Receipt, error) {
-	return model.Receipt{}, nil
+	receipt, err := r.receiptRepository.Store(receipt)
+	if err != nil {
+		return model.Receipt{}, err
+	}
+	return receipt, nil
 }
 
 func (r ReceiptService) Update(receipt model.Receipt) (model.Receipt, error) {
-	return model.Receipt{}, nil
+	receipt, err := r.receiptRepository.Update(receipt)
+	if err != nil {
+		return model.Receipt{}, err
+	}
+	return receipt, nil
 }
 
 func (r ReceiptService) Destroy(id int64) (model.Receipt, error) {
-	return model.Receipt{}, nil
+	receipt, err := r.receiptRepository.Destroy(id)
+	if err != nil {
+		return model.Receipt{}, err
+	}
+	return receipt, nil
 }
