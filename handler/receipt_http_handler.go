@@ -22,11 +22,12 @@ func NewReceiptHttpHandler(mux *mux.Router, receiptService service.ReceiptContra
 	handler := &ReceiptHttpHandler{
 		Rs: receiptService,
 	}
-	mux.HandleFunc("/receipts/retrieve", handler.Retrieve())
+	mux.HandleFunc("/receipts/retrieve", handler.Retrieve()).Methods("GET")
+	mux.HandleFunc("/receipts/{id}", handler.Find()).Methods("GET")
 	mux.HandleFunc("/receipts/{id}", handler.Update()).Methods("PUT")
 	mux.HandleFunc("/receipts/{id}", handler.Destroy()).Methods("DELETE")
 	mux.HandleFunc("/receipts", handler.Store()).Methods("POST")
-	mux.HandleFunc("/receipts", handler.All())
+	mux.HandleFunc("/receipts", handler.All()).Methods("GET")
 }
 
 func (rh ReceiptHttpHandler) All() http.HandlerFunc {

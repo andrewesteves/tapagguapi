@@ -17,7 +17,7 @@ func NewReceiptPostgresRepository(Conn *sql.DB) ReceiptContractRepository {
 
 func (r ReceiptPostgresRepository) All() ([]model.Receipt, error) {
 	var receipts []model.Receipt
-	rs, err := r.Conn.Query("SELECT id, title, tax, discount, extra, total, url, accessKey, issuedAt, createdAt, updatedAt FROM receipts")
+	rs, err := r.Conn.Query("SELECT id, title, tax, discount, extra, total, url, access_key, issued_at, created_at, updated_at FROM receipts")
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func (r ReceiptPostgresRepository) All() ([]model.Receipt, error) {
 
 func (r ReceiptPostgresRepository) Find(id int64) (model.Receipt, error) {
 	var receipt model.Receipt
-	err := r.Conn.QueryRow("SELECT id, title, tax, discount, extra, total, url, accessKey, issuedAt, createdAt, updatedAt FROM receipts WHERE id = $1", id).Scan(&receipt.ID, &receipt.Title, &receipt.Tax, &receipt.Discount, &receipt.Extra, &receipt.Total, &receipt.URL, &receipt.AccessKey, &receipt.IssuedAt, &receipt.CreatedAt, &receipt.UpdatedAt)
+	err := r.Conn.QueryRow("SELECT id, title, tax, discount, extra, total, url, access_key, issued_at, created_at, updated_at FROM receipts WHERE id = $1", id).Scan(&receipt.ID, &receipt.Title, &receipt.Tax, &receipt.Discount, &receipt.Extra, &receipt.Total, &receipt.URL, &receipt.AccessKey, &receipt.IssuedAt, &receipt.CreatedAt, &receipt.UpdatedAt)
 	if err != nil {
 		return model.Receipt{}, err
 	}
@@ -45,7 +45,7 @@ func (r ReceiptPostgresRepository) Find(id int64) (model.Receipt, error) {
 
 func (r ReceiptPostgresRepository) Store(receipt model.Receipt) (model.Receipt, error) {
 	lastInsertId := 0
-	err := r.Conn.QueryRow("INSERT INTO receipts (title, tax, discount, extra, total, url, accessKey, issuedAt, createdAt, updatedAt) VALUES ($1,$2,$3,$4,$5,$6,$7,now(),now(),now()) RETURNING id", receipt.Title, receipt.Tax, receipt.Discount, receipt.Extra, receipt.Total, receipt.URL, receipt.AccessKey).Scan(&lastInsertId)
+	err := r.Conn.QueryRow("INSERT INTO receipts (title, tax, discount, extra, total, url, access_key, issued_at, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,now(),now(),now()) RETURNING id", receipt.Title, receipt.Tax, receipt.Discount, receipt.Extra, receipt.Total, receipt.URL, receipt.AccessKey).Scan(&lastInsertId)
 	if err != nil {
 		return model.Receipt{}, err
 	}
@@ -61,7 +61,7 @@ func (r ReceiptPostgresRepository) Update(receipt model.Receipt) (model.Receipt,
 	if rcpt.ID < 1 {
 		return model.Receipt{}, errors.New("Cant't find this receipt id.")
 	}
-	rs, err := r.Conn.Prepare("UPDATE receipts SET title = $1, tax = $2, discount = $3, extra = $4, total = $5, url = $6, accessKey = $7, issuedAt = $8, updatedAt = now() WHERE id = $9")
+	rs, err := r.Conn.Prepare("UPDATE receipts SET title = $1, tax = $2, discount = $3, extra = $4, total = $5, url = $6, access_key = $7, issued_at = $8, updated_at = now() WHERE id = $9")
 	if err != nil {
 		return model.Receipt{}, err
 	}
