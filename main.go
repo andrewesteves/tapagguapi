@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/andrewesteves/tapagguapi/handler"
+	"github.com/andrewesteves/tapagguapi/middleware"
 	"github.com/andrewesteves/tapagguapi/repository"
 	"github.com/andrewesteves/tapagguapi/service"
 	"github.com/gorilla/mux"
@@ -22,6 +23,6 @@ func main() {
 	receiptRepository := repository.NewReceiptPostgresRepository(db)
 	receiptService := service.NewReceiptService(receiptRepository)
 	handler.NewReceiptHttpHandler(mux, receiptService)
-
+	mux.Use(middleware.CorsMiddleware{}.Enable)
 	http.ListenAndServe(":3000", mux)
 }
