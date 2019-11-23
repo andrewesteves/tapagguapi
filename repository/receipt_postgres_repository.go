@@ -3,8 +3,10 @@ package repository
 import (
 	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/andrewesteves/tapagguapi/model"
+	"github.com/lib/pq"
 )
 
 type ReceiptPostgresRepository struct {
@@ -50,6 +52,36 @@ func (r ReceiptPostgresRepository) Store(receipt model.Receipt) (model.Receipt, 
 		return model.Receipt{}, err
 	}
 	receipt.ID = int64(lastInsertId)
+
+	if len(receipt.Items) > 0 {
+		txn, err := r.Conn.Begin()
+		if err != nil {
+			return model.Receipt{}, err
+		}
+		stmt, err := txn.Prepare(pq.CopyIn("items", "receipt_id", "title", "price", "quantity", "total", "tax", "measure", "created_at", "updated_at"))
+		if err != nil {
+			return model.Receipt{}, err
+		}
+		for _, item := range receipt.Items {
+			_, err = stmt.Exec(receipt.ID, item.Title, item.Price, item.Quantity, item.Total, item.Tax, item.Measure, time.Now(), time.Now())
+			if err != nil {
+				return model.Receipt{}, err
+			}
+		}
+		_, err = stmt.Exec()
+		if err != nil {
+			return model.Receipt{}, err
+		}
+		err = stmt.Close()
+		if err != nil {
+			return model.Receipt{}, err
+		}
+		err = txn.Commit()
+		if err != nil {
+			return model.Receipt{}, err
+		}
+	}
+
 	return receipt, nil
 }
 

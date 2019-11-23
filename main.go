@@ -23,6 +23,11 @@ func main() {
 	receiptRepository := repository.NewReceiptPostgresRepository(db)
 	receiptService := service.NewReceiptService(receiptRepository)
 	handler.NewReceiptHttpHandler(mux, receiptService)
+
+	itemRepository := repository.NewItemPostgresRepository(db)
+	itemService := service.ItemContractService(itemRepository)
+	handler.NewItemHttpHandler(mux, itemService)
+
 	mux.Use(middleware.CorsMiddleware{}.Enable)
 	http.ListenAndServe(":3000", mux)
 }
