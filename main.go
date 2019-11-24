@@ -7,7 +7,6 @@ import (
 	"log"
 
 	"github.com/andrewesteves/tapagguapi/handler"
-	"github.com/andrewesteves/tapagguapi/middleware"
 	"github.com/andrewesteves/tapagguapi/repository"
 	"github.com/andrewesteves/tapagguapi/service"
 	"github.com/gorilla/mux"
@@ -30,7 +29,7 @@ func main() {
 	itemService := service.ItemContractService(itemRepository)
 	handler.NewItemHttpHandler(mux, itemService)
 
-	mux.Use(middleware.CorsMiddleware{}.Enable)
+	// mux.Use(middleware.CorsMiddleware{}.Enable)
 
 	port := os.Getenv("PORT")
 	if port == "" {
