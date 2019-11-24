@@ -1,52 +1,42 @@
 package main
 
 import (
-	"encoding/json"
-	"encoding/xml"
-	"fmt"
-	"io/ioutil"
-	"log"
+	"database/sql"
 	"net/http"
 	"os"
-	
-	"github.com/andrewesteves/tapagguapi/models"
-	"github.com/andrewesteves/tapagguapi/transformations"
+	"log"
+
+	"github.com/andrewesteves/tapagguapi/handler"
+	"github.com/andrewesteves/tapagguapi/middleware"
+	"github.com/andrewesteves/tapagguapi/repository"
+	"github.com/andrewesteves/tapagguapi/service"
+	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
 )
 
 func main() {
-	http.HandleFunc("/receipt", func(w http.ResponseWriter, r *http.Request) {
-		var receipt models.ReceiptXML
-		data, err := getURL(r.URL.Query().Get("url"))
-		if err != nil {
-			log.Printf("Failed to get XML: %v", err)
-		}
-		xml.Unmarshal(data, &receipt)
-		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(transformations.ReceiptToJSON(receipt))
-	})
+	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Fatalf("Error opening database: %q", err)
+	}
+
+	// defer db.Close()
+
+	mux := mux.NewRouter()
+	receiptRepository := repository.NewReceiptPostgresRepository(db)
+	receiptService := service.NewReceiptService(receiptRepository)
+	handler.NewReceiptHttpHandler(mux, receiptService)
+
+	itemRepository := repository.NewItemPostgresRepository(db)
+	itemService := service.ItemContractService(itemRepository)
+	handler.NewItemHttpHandler(mux, itemService)
+
+	mux.Use(middleware.CorsMiddleware{}.Enable)
+
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8000" //localhost
-	}
-	log.Fatal(http.ListenAndServe(":"+port, nil))
-}
-
-func getURL(url string) ([]byte, error) {
-	resp, err := http.Get(url)
-	if err != nil {
-		return []byte{}, fmt.Errorf("GET error: %v", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return []byte{}, fmt.Errorf("STATUS error: %v", resp.StatusCode)
+		log.Fatal("$PORT must be set")
 	}
 
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return []byte{}, fmt.Errorf("READ BODY error: %v", err)
-	}
-
-	return data, nil
+	log.Println(http.ListenAndServe(":" + port, mux))
 }
