@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"github.com/andrewesteves/tapagguapi/handler"
+	"github.com/andrewesteves/tapagguapi/middleware"
 	"github.com/andrewesteves/tapagguapi/repository"
 	"github.com/andrewesteves/tapagguapi/service"
 	"github.com/gorilla/mux"
@@ -16,9 +17,10 @@ import (
 func main() {
 	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
-		panic(err.Error())
+		log.Fatalf("Error opening database: %q", err)
 	}
-	defer db.Close()
+
+	// defer db.Close()
 
 	mux := mux.NewRouter()
 	receiptRepository := repository.NewReceiptPostgresRepository(db)
@@ -29,12 +31,12 @@ func main() {
 	itemService := service.ItemContractService(itemRepository)
 	handler.NewItemHttpHandler(mux, itemService)
 
-	// mux.Use(middleware.CorsMiddleware{}.Enable)
+	mux.Use(middleware.CorsMiddleware{}.Enable)
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		log.Fatal("$PORT must be set")
 	}
 
-	http.ListenAndServe(":" + port, mux)
+	log.Println(http.ListenAndServe(":" + port, mux))
 }
