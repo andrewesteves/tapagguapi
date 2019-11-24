@@ -21,7 +21,7 @@ func main() {
 	}
 	defer db.Close()
 
-	mux := mux.NewRouter().StrictSlash(true)
+	mux := mux.NewRouter()
 	receiptRepository := repository.NewReceiptPostgresRepository(db)
 	receiptService := service.NewReceiptService(receiptRepository)
 	handler.NewReceiptHttpHandler(mux, receiptService)
