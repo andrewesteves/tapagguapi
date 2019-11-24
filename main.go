@@ -3,6 +3,8 @@ package main
 import (
 	"database/sql"
 	"net/http"
+	"os"
+	"log"
 
 	"github.com/andrewesteves/tapagguapi/handler"
 	"github.com/andrewesteves/tapagguapi/middleware"
@@ -13,7 +15,7 @@ import (
 )
 
 func main() {
-	db, err := sql.Open("postgres", "user=root password=4321 dbname=tapaggu sslmode=disable")
+	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		panic(err.Error())
 	}
@@ -29,5 +31,11 @@ func main() {
 	handler.NewItemHttpHandler(mux, itemService)
 
 	mux.Use(middleware.CorsMiddleware{}.Enable)
-	http.ListenAndServe(":3000", mux)
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		log.Fatal("$PORT must be set")
+	}
+
+	http.ListenAndServe(":" + port, mux)
 }
