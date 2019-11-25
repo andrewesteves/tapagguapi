@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"time"
+	"log"
 
 	"github.com/andrewesteves/tapagguapi/model"
 	"github.com/lib/pq"
@@ -14,7 +15,15 @@ type ReceiptPostgresRepository struct {
 }
 
 func NewReceiptPostgresRepository(Conn *sql.DB) ReceiptContractRepository {
+	ReceiptPostgresRepository{}.Create()
 	return &ReceiptPostgresRepository{Conn}
+}
+
+func (r ReceiptPostgresRepository) Create() {
+	err := r.Conn.QueryRow("CREATE TABLE IF NOT EXISTS receipts(id SERIAL PRIMARY KEY, title VARCHAR(255) NOT NULL, tax REAL NULL, extra REAL NOT NULL, discount REAL NOT NULL, total REAL NOT NULL, url VARCHAR(255) NULL, access_key VARCHAR(255) NULL, issued_at TIMESTAMP NULL, created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL)")
+	if err != nil {
+		log.Fatal("Error creating receipts table: ", err)
+	}
 }
 
 func (r ReceiptPostgresRepository) All() ([]model.Receipt, error) {

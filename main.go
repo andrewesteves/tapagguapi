@@ -16,11 +16,10 @@ import (
 
 func main() {
 	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	
 	if err != nil {
 		log.Fatalf("Error opening database: %q", err)
 	}
-
-	// defer db.Close()
 
 	mux := mux.NewRouter()
 	receiptRepository := repository.NewReceiptPostgresRepository(db)

@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"errors"
+	"log"
 
 	"github.com/andrewesteves/tapagguapi/model"
 )
@@ -12,7 +13,15 @@ type ItemPostgresRepository struct {
 }
 
 func NewItemPostgresRepository(Conn *sql.DB) ItemContractRepository {
+	ItemPostgresRepository{}.Create()
 	return &ItemPostgresRepository{Conn}
+}
+
+func (r ItemPostgresRepository) Create() {
+	err := r.Conn.QueryRow("CREATE TABLE IF NOT EXISTS items(id SERIAL PRIMARY KEY, receipt_id INTEGER NOT NULL, title VARCHAR(255) NOT NULL, price REAL NULL, quantity REAL NULL, total REAL NULL, tax REAL NULL, measure VARCHAR(255) NOT NULL, created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL, CONSTRAINT fk_receipt_item FOREIGN KEY (receipt_id) REFERENCES receipts(id))")
+	if err != nil {
+		log.Fatal("Error creating items table: ", err)
+	}
 }
 
 func (r ItemPostgresRepository) All(receiptId int64) ([]model.Item, error) {
