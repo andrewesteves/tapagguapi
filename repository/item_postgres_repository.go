@@ -18,9 +18,8 @@ func NewItemPostgresRepository(Conn *sql.DB) ItemContractRepository {
 }
 
 func (r ItemPostgresRepository) Create() {
-	err := r.Conn.QueryRow("CREATE TABLE IF NOT EXISTS items(id SERIAL PRIMARY KEY, receipt_id INTEGER NOT NULL, title VARCHAR(255) NOT NULL, price REAL NULL, quantity REAL NULL, total REAL NULL, tax REAL NULL, measure VARCHAR(255) NOT NULL, created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL, CONSTRAINT fk_receipt_item FOREIGN KEY (receipt_id) REFERENCES receipts(id))")
-	if err != nil {
-		log.Fatal("Error creating items table: ", err)
+	if _, err := r.Conn.Exec("CREATE TABLE IF NOT EXISTS items(id SERIAL PRIMARY KEY, receipt_id INTEGER NOT NULL, title VARCHAR(255) NOT NULL, price REAL NULL, quantity REAL NULL, total REAL NULL, tax REAL NULL, measure VARCHAR(255) NOT NULL, created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL, CONSTRAINT fk_receipt_item FOREIGN KEY (receipt_id) REFERENCES receipts(id))"); err != nil {
+		log.Fatalf("Error creating database table: %q", err)
 	}
 }
 
