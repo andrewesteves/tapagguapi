@@ -13,7 +13,7 @@ type ItemPostgresRepository struct {
 }
 
 func NewItemPostgresRepository(Conn *sql.DB) ItemContractRepository {
-	ItemPostgresRepository{}.Create()
+	// ItemPostgresRepository{}.Create()
 	return &ItemPostgresRepository{Conn}
 }
 

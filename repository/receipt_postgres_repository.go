@@ -15,7 +15,7 @@ type ReceiptPostgresRepository struct {
 }
 
 func NewReceiptPostgresRepository(Conn *sql.DB) ReceiptContractRepository {
-	ReceiptPostgresRepository{}.Create()
+	// ReceiptPostgresRepository{}.Create()
 	return &ReceiptPostgresRepository{Conn}
 }
 
