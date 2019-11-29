@@ -2,7 +2,10 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
+	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/andrewesteves/tapagguapi/handler"
 	"github.com/andrewesteves/tapagguapi/middleware"
@@ -12,12 +15,33 @@ import (
 	_ "github.com/lib/pq"
 )
 
+const (
+	host     = "localhost"
+	port     = 5432
+	user     = "root"
+	password = "4321"
+	dbname   = "tapaggu"
+	sslmode  = "disable"
+)
+
 func main() {
-	db, err := sql.Open("postgres", "user=root password=4321 dbname=tapaggu sslmode=disable")
+	db, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s", host, port, user, password, dbname, sslmode))
 	if err != nil {
 		panic(err.Error())
 	}
 	defer db.Close()
+
+	file, err := ioutil.ReadFile("db.sql")
+	if err != nil {
+		panic(err.Error())
+	}
+	stmt := strings.Split(string(file), ";")
+	for _, s := range stmt {
+		_, err := db.Exec(s)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
 
 	mux := mux.NewRouter().StrictSlash(true)
 	receiptRepository := repository.NewReceiptPostgresRepository(db)
@@ -25,9 +49,14 @@ func main() {
 	handler.NewReceiptHttpHandler(mux, receiptService)
 
 	itemRepository := repository.NewItemPostgresRepository(db)
-	itemService := service.ItemContractService(itemRepository)
+	itemService := service.NewItemService(itemRepository)
 	handler.NewItemHttpHandler(mux, itemService)
 
+	userRepository := repository.NewUserPostgresRepository(db)
+	userService := service.NewUserService(userRepository)
+	handler.NewUserHttpHandler(mux, userService)
+
 	mux.Use(middleware.CorsMiddleware{}.Enable)
+	mux.Use(middleware.AuthMiddleware{}.Enable)
 	http.ListenAndServe(":3000", mux)
 }

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -28,6 +29,7 @@ func NewItemHttpHandler(mux *mux.Router, itemService service.ItemContractService
 
 func (ih ItemHttpHandler) All() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println(r.Context().Value("token"))
 		vars := mux.Vars(r)
 		receiptId, _ := strconv.Atoi(vars["receiptId"])
 		items, err := ih.Is.All(int64(receiptId))
