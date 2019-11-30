@@ -50,11 +50,11 @@ func main() {
 
 	itemRepository := repository.NewItemPostgresRepository(db)
 	itemService := service.NewItemService(itemRepository)
-	handler.NewItemHttpHandler(mux, itemService)
+	handler.NewItemHTTPHandler(mux, itemService)
 
 	userRepository := repository.NewUserPostgresRepository(db)
 	userService := service.NewUserService(userRepository)
-	handler.NewUserHttpHandler(mux, userService)
+	handler.NewUserHTTPHandler(mux, userService)
 
 	auth := middleware.AuthMiddleware{Conn: db}
 	mux.Use(middleware.CorsMiddleware{}.Enable)

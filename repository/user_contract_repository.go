@@ -2,6 +2,7 @@ package repository
 
 import "github.com/andrewesteves/tapagguapi/model"
 
+// UserContractRepository contract
 type UserContractRepository interface {
 	All() ([]model.User, error)
 	Find(id int64) (model.User, error)

@@ -11,12 +11,14 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type UserHttpHandler struct {
+// UserHTTPHandler struct
+type UserHTTPHandler struct {
 	Us service.UserContractService
 }
 
-func NewUserHttpHandler(mux *mux.Router, userService service.UserContractService) {
-	handler := &UserHttpHandler{
+// NewUserHTTPHandler new user handler
+func NewUserHTTPHandler(mux *mux.Router, userService service.UserContractService) {
+	handler := &UserHTTPHandler{
 		Us: userService,
 	}
 	mux.HandleFunc("/users/login", handler.Login()).Methods("POST")
@@ -28,7 +30,8 @@ func NewUserHttpHandler(mux *mux.Router, userService service.UserContractService
 	mux.HandleFunc("/users", handler.All()).Methods("GET")
 }
 
-func (uh UserHttpHandler) All() http.HandlerFunc {
+// All handler of users
+func (uh UserHTTPHandler) All() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		users, err := uh.Us.All()
 		if err != nil {
@@ -40,7 +43,8 @@ func (uh UserHttpHandler) All() http.HandlerFunc {
 	}
 }
 
-func (uh UserHttpHandler) Find() http.HandlerFunc {
+// Find handler of user
+func (uh UserHTTPHandler) Find() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id, err := strconv.Atoi(vars["id"])
@@ -57,7 +61,8 @@ func (uh UserHttpHandler) Find() http.HandlerFunc {
 	}
 }
 
-func (uh UserHttpHandler) Store() http.HandlerFunc {
+// Store handler of user
+func (uh UserHTTPHandler) Store() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var user model.User
 		reqBody, _ := ioutil.ReadAll(r.Body)
@@ -73,7 +78,8 @@ func (uh UserHttpHandler) Store() http.HandlerFunc {
 	}
 }
 
-func (uh UserHttpHandler) Update() http.HandlerFunc {
+// Update handler of user
+func (uh UserHTTPHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var user model.User
 		vars := mux.Vars(r)
@@ -94,7 +100,8 @@ func (uh UserHttpHandler) Update() http.HandlerFunc {
 	}
 }
 
-func (uh UserHttpHandler) Destroy() http.HandlerFunc {
+// Destroy handler of user
+func (uh UserHTTPHandler) Destroy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id, err := strconv.Atoi(vars["id"])
@@ -111,7 +118,8 @@ func (uh UserHttpHandler) Destroy() http.HandlerFunc {
 	}
 }
 
-func (uh UserHttpHandler) Login() http.HandlerFunc {
+// Login handler of user
+func (uh UserHTTPHandler) Login() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var user model.User
 		reqBody, _ := ioutil.ReadAll(r.Body)
@@ -129,7 +137,8 @@ func (uh UserHttpHandler) Login() http.HandlerFunc {
 	}
 }
 
-func (uh UserHttpHandler) Logout() http.HandlerFunc {
+// Logout handler of user
+func (uh UserHTTPHandler) Logout() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var user model.User
 		reqBody, _ := ioutil.ReadAll(r.Body)
