@@ -9,17 +9,20 @@ import (
 	"github.com/lib/pq"
 )
 
+// ReceiptPostgresRepository struct
 type ReceiptPostgresRepository struct {
 	Conn *sql.DB
 }
 
+// NewReceiptPostgresRepository new repository
 func NewReceiptPostgresRepository(Conn *sql.DB) ReceiptContractRepository {
 	return &ReceiptPostgresRepository{Conn}
 }
 
-func (r ReceiptPostgresRepository) All() ([]model.Receipt, error) {
+// All receipts
+func (r ReceiptPostgresRepository) All(user model.User) ([]model.Receipt, error) {
 	var receipts []model.Receipt
-	rs, err := r.Conn.Query("SELECT id, title, tax, discount, extra, total, url, access_key, issued_at, created_at, updated_at FROM receipts")
+	rs, err := r.Conn.Query("SELECT id, title, tax, discount, extra, total, url, access_key, issued_at, created_at, updated_at FROM receipts ORDER BY created_at DESC")
 	if err != nil {
 		return nil, err
 	}
@@ -30,12 +33,18 @@ func (r ReceiptPostgresRepository) All() ([]model.Receipt, error) {
 		if err != nil {
 			return nil, err
 		}
+		itemRepo := NewItemPostgresRepository(r.Conn)
+		receipt.Items, _ = itemRepo.All(receipt.ID)
+		if len(receipt.Items) < 1 {
+			receipt.Items = make([]model.Item, 0)
+		}
 		receipts = append(receipts, receipt)
 	}
 
 	return receipts, nil
 }
 
+// Find an receipt
 func (r ReceiptPostgresRepository) Find(id int64) (model.Receipt, error) {
 	var receipt model.Receipt
 	err := r.Conn.QueryRow("SELECT id, title, tax, discount, extra, total, url, access_key, issued_at, created_at, updated_at FROM receipts WHERE id = $1", id).Scan(&receipt.ID, &receipt.Title, &receipt.Tax, &receipt.Discount, &receipt.Extra, &receipt.Total, &receipt.URL, &receipt.AccessKey, &receipt.IssuedAt, &receipt.CreatedAt, &receipt.UpdatedAt)
@@ -45,13 +54,14 @@ func (r ReceiptPostgresRepository) Find(id int64) (model.Receipt, error) {
 	return receipt, nil
 }
 
+// Store an receipt
 func (r ReceiptPostgresRepository) Store(receipt model.Receipt) (model.Receipt, error) {
-	lastInsertId := 0
-	err := r.Conn.QueryRow("INSERT INTO receipts (title, tax, discount, extra, total, url, access_key, issued_at, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,now(),now(),now()) RETURNING id", receipt.Title, receipt.Tax, receipt.Discount, receipt.Extra, receipt.Total, receipt.URL, receipt.AccessKey).Scan(&lastInsertId)
+	lastInsertID := 0
+	err := r.Conn.QueryRow("INSERT INTO receipts (user_id, title, tax, discount, extra, total, url, access_key, issued_at, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,now(),now(),now()) RETURNING id", receipt.User.ID, receipt.Title, receipt.Tax, receipt.Discount, receipt.Extra, receipt.Total, receipt.URL, receipt.AccessKey).Scan(&lastInsertID)
 	if err != nil {
 		return model.Receipt{}, err
 	}
-	receipt.ID = int64(lastInsertId)
+	receipt.ID = int64(lastInsertID)
 
 	if len(receipt.Items) > 0 {
 		txn, err := r.Conn.Begin()
@@ -85,13 +95,14 @@ func (r ReceiptPostgresRepository) Store(receipt model.Receipt) (model.Receipt, 
 	return receipt, nil
 }
 
+// Update an receipt
 func (r ReceiptPostgresRepository) Update(receipt model.Receipt) (model.Receipt, error) {
 	rcpt, err := r.Find(receipt.ID)
 	if err != nil {
 		return model.Receipt{}, err
 	}
 	if rcpt.ID < 1 {
-		return model.Receipt{}, errors.New("Cant't find this receipt id.")
+		return model.Receipt{}, errors.New("Cant't find this receipt id")
 	}
 	rs, err := r.Conn.Prepare("UPDATE receipts SET title = $1, tax = $2, discount = $3, extra = $4, total = $5, url = $6, access_key = $7, issued_at = $8, updated_at = now() WHERE id = $9")
 	if err != nil {
@@ -101,13 +112,14 @@ func (r ReceiptPostgresRepository) Update(receipt model.Receipt) (model.Receipt,
 	return receipt, nil
 }
 
+// Destroy an receipt
 func (r ReceiptPostgresRepository) Destroy(id int64) (model.Receipt, error) {
 	rcpt, err := r.Find(id)
 	if err != nil {
 		return model.Receipt{}, err
 	}
 	if rcpt.ID < 1 {
-		return model.Receipt{}, errors.New("Cant't find this receipt id.")
+		return model.Receipt{}, errors.New("Cant't find this receipt id")
 	}
 	rs, err := r.Conn.Prepare("DELETE FROM receipts WHERE id = $1")
 	if err != nil {

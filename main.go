@@ -46,7 +46,7 @@ func main() {
 	mux := mux.NewRouter().StrictSlash(true)
 	receiptRepository := repository.NewReceiptPostgresRepository(db)
 	receiptService := service.NewReceiptService(receiptRepository)
-	handler.NewReceiptHttpHandler(mux, receiptService)
+	handler.NewReceiptHTTPHandler(mux, receiptService)
 
 	itemRepository := repository.NewItemPostgresRepository(db)
 	itemService := service.NewItemService(itemRepository)

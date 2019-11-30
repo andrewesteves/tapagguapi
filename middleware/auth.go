@@ -15,6 +15,24 @@ type AuthMiddleware struct {
 	Conn *sql.DB
 }
 
+type userCtxKeyType string
+
+const userCtxKey userCtxKeyType = "user"
+
+// WithUser set the authenticated user
+func WithUser(ctx context.Context, user *model.User) context.Context {
+	return context.WithValue(ctx, userCtxKey, user)
+}
+
+// GetUser get the authenticated user
+func GetUser(ctx context.Context) *model.User {
+	user, ok := ctx.Value(userCtxKey).(*model.User)
+	if !ok {
+		return nil
+	}
+	return user
+}
+
 // Enable authentication by token
 func (a AuthMiddleware) Enable(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -25,13 +43,12 @@ func (a AuthMiddleware) Enable(next http.Handler) http.Handler {
 			if len(headerAuth) > 1 {
 				token = headerAuth[1]
 			}
-			r = r.WithContext(context.WithValue(r.Context(), "token", token))
 			err := a.Conn.QueryRow("SELECT id, name, email, token FROM users WHERE token = $1", strings.TrimSpace(token)).Scan(&user.ID, &user.Name, &user.Email, &user.Token)
 			if err != nil {
-				http.Error(w, "Please provide the autorization", http.StatusUnauthorized)
+				http.Error(w, "Please provide the autorization token", http.StatusUnauthorized)
 				return
 			}
-			r = r.WithContext(context.WithValue(r.Context(), "user", user))
+			r = r.WithContext(WithUser(r.Context(), &user))
 		}
 		next.ServeHTTP(w, r)
 	})

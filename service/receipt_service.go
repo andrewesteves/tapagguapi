@@ -13,8 +13,8 @@ func NewReceiptService(rs repository.ReceiptContractRepository) ReceiptContractS
 	return &ReceiptService{rs}
 }
 
-func (r ReceiptService) All() ([]model.Receipt, error) {
-	receipts, err := r.receiptRepository.All()
+func (r ReceiptService) All(user model.User) ([]model.Receipt, error) {
+	receipts, err := r.receiptRepository.All(user)
 	if err != nil {
 		return nil, err
 	}

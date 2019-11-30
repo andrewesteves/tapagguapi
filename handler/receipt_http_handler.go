@@ -9,17 +9,20 @@ import (
 	"strconv"
 
 	"github.com/andrewesteves/tapagguapi/common"
+	"github.com/andrewesteves/tapagguapi/middleware"
 	"github.com/andrewesteves/tapagguapi/model"
 	"github.com/andrewesteves/tapagguapi/service"
 	"github.com/gorilla/mux"
 )
 
-type ReceiptHttpHandler struct {
+// ReceiptHTTPHandler struct
+type ReceiptHTTPHandler struct {
 	Rs service.ReceiptContractService
 }
 
-func NewReceiptHttpHandler(mux *mux.Router, receiptService service.ReceiptContractService) {
-	handler := &ReceiptHttpHandler{
+// NewReceiptHTTPHandler new receipt handler
+func NewReceiptHTTPHandler(mux *mux.Router, receiptService service.ReceiptContractService) {
+	handler := &ReceiptHTTPHandler{
 		Rs: receiptService,
 	}
 	mux.HandleFunc("/receipts/retrieve", handler.Retrieve()).Methods("GET")
@@ -30,9 +33,10 @@ func NewReceiptHttpHandler(mux *mux.Router, receiptService service.ReceiptContra
 	mux.HandleFunc("/receipts", handler.All()).Methods("GET")
 }
 
-func (rh ReceiptHttpHandler) All() http.HandlerFunc {
+// All handler of a receipts
+func (rh ReceiptHTTPHandler) All() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		receipts, err := rh.Rs.All()
+		receipts, err := rh.Rs.All(*middleware.GetUser(r.Context()))
 		if err != nil {
 			panic(err.Error())
 		}
@@ -42,7 +46,8 @@ func (rh ReceiptHttpHandler) All() http.HandlerFunc {
 	}
 }
 
-func (rh ReceiptHttpHandler) Find() http.HandlerFunc {
+// Find handler of a receipt
+func (rh ReceiptHTTPHandler) Find() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id, err := strconv.Atoi(vars["id"])
@@ -59,11 +64,13 @@ func (rh ReceiptHttpHandler) Find() http.HandlerFunc {
 	}
 }
 
-func (rh ReceiptHttpHandler) Store() http.HandlerFunc {
+// Store handler of a receipt
+func (rh ReceiptHTTPHandler) Store() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var receipt model.Receipt
 		reqBody, _ := ioutil.ReadAll(r.Body)
 		json.Unmarshal(reqBody, &receipt)
+		receipt.User = *middleware.GetUser(r.Context())
 		receipt, err := rh.Rs.Store(receipt)
 		if err != nil {
 			panic(err.Error())
@@ -74,7 +81,8 @@ func (rh ReceiptHttpHandler) Store() http.HandlerFunc {
 	}
 }
 
-func (rh ReceiptHttpHandler) Update() http.HandlerFunc {
+// Update handler of a receipt
+func (rh ReceiptHTTPHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var receipt model.Receipt
 		vars := mux.Vars(r)
@@ -95,7 +103,8 @@ func (rh ReceiptHttpHandler) Update() http.HandlerFunc {
 	}
 }
 
-func (rh ReceiptHttpHandler) Destroy() http.HandlerFunc {
+// Destroy handler of a receipt
+func (rh ReceiptHTTPHandler) Destroy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id, err := strconv.Atoi(vars["id"])
@@ -112,7 +121,8 @@ func (rh ReceiptHttpHandler) Destroy() http.HandlerFunc {
 	}
 }
 
-func (rh ReceiptHttpHandler) Retrieve() http.HandlerFunc {
+// Retrieve handler of a receipt
+func (rh ReceiptHTTPHandler) Retrieve() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var receipt model.Receipt
 		data, err := common.GetURL(r.URL.Query().Get("url"))

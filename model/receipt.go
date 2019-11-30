@@ -2,8 +2,10 @@ package model
 
 import "time"
 
+// Receipt model
 type Receipt struct {
 	ID        int64     `json:"id"`
+	User      User      `json:"user"`
 	Company   Company   `json:"company" xml:"proc>nfeProc>NFe>infNFe>emit"`
 	Title     string    `json:"title"`
 	Tax       float64   `json:"tax" xml:"proc>nfeProc>NFe>infNFe>total>ICMSTot>vTotTrib"`
