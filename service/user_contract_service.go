@@ -2,6 +2,7 @@ package service
 
 import "github.com/andrewesteves/tapagguapi/model"
 
+// UserContractService contract
 type UserContractService interface {
 	All() ([]model.User, error)
 	Find(id int64) (model.User, error)

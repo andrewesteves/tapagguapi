@@ -56,6 +56,10 @@ func main() {
 	userService := service.NewUserService(userRepository)
 	handler.NewUserHTTPHandler(mux, userService)
 
+	categoryRepository := repository.NewCategoryPostgresRepository(db)
+	categoryService := service.NewCategoryService(categoryRepository)
+	handler.NewCategoryHTTPHandler(mux, categoryService)
+
 	auth := middleware.AuthMiddleware{Conn: db}
 	mux.Use(middleware.CorsMiddleware{}.Enable)
 	mux.Use(auth.Enable)

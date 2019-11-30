@@ -9,14 +9,17 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// UserService struct
 type UserService struct {
 	userRepository repository.UserContractRepository
 }
 
+// NewUserService new user service
 func NewUserService(rs repository.UserContractRepository) UserContractService {
 	return &UserService{rs}
 }
 
+// All users service
 func (u UserService) All() ([]model.User, error) {
 	users, err := u.userRepository.All()
 	if err != nil {
@@ -25,6 +28,7 @@ func (u UserService) All() ([]model.User, error) {
 	return users, nil
 }
 
+// Find user service
 func (u UserService) Find(id int64) (model.User, error) {
 	user, err := u.userRepository.Find(id)
 	if err != nil {
@@ -33,6 +37,7 @@ func (u UserService) Find(id int64) (model.User, error) {
 	return user, nil
 }
 
+// Store user service
 func (u UserService) Store(user model.User) (model.User, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -47,6 +52,7 @@ func (u UserService) Store(user model.User) (model.User, error) {
 	return user, nil
 }
 
+// Update user service
 func (u UserService) Update(user model.User) (model.User, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -61,6 +67,7 @@ func (u UserService) Update(user model.User) (model.User, error) {
 	return user, nil
 }
 
+// Destroy user service
 func (u UserService) Destroy(id int64) (model.User, error) {
 	user, err := u.userRepository.Destroy(id)
 	if err != nil {
@@ -69,6 +76,7 @@ func (u UserService) Destroy(id int64) (model.User, error) {
 	return user, nil
 }
 
+// FindBy user service
 func (u UserService) FindBy(field string, value interface{}) (model.User, error) {
 	user, err := u.userRepository.FindBy(field, value)
 	if err != nil {
@@ -77,6 +85,7 @@ func (u UserService) FindBy(field string, value interface{}) (model.User, error)
 	return user, nil
 }
 
+// Login user service
 func (u UserService) Login(user model.User) (model.User, error) {
 	dUser, err := u.userRepository.FindBy("email", user.Email)
 	if err != nil {
@@ -95,6 +104,7 @@ func (u UserService) Login(user model.User) (model.User, error) {
 	return dUser, nil
 }
 
+// Logout user service
 func (u UserService) Logout(user model.User) (model.User, error) {
 	dUser, err := u.userRepository.FindBy("email", user.Email)
 	if err != nil {

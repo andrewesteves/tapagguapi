@@ -8,8 +8,19 @@ CREATE TABLE IF NOT EXISTS users(
 	updated_at TIMESTAMP NULL
 );
 
+CREATE TABLE IF NOT EXISTS categories(
+	id SERIAL PRIMARY KEY,
+	user_id INTEGER NOT NULL,
+	title VARCHAR(255) NOT NULL,
+	icon VARCHAR(255) NOT NULL,
+	created_at TIMESTAMP NULL,
+	updated_at TIMESTAMP NULL,
+	CONSTRAINT fk_user_category FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
 CREATE TABLE IF NOT EXISTS receipts(
 	id SERIAL PRIMARY KEY,
+	category_id INTEGER NOT NULL, 
 	user_id INTEGER NOT NULL, 
 	title VARCHAR(255) NOT NULL,
 	tax REAL NULL,
@@ -21,6 +32,7 @@ CREATE TABLE IF NOT EXISTS receipts(
 	issued_at TIMESTAMP NULL,
 	created_at TIMESTAMP NULL,
 	updated_at TIMESTAMP NULL,
+	CONSTRAINT fk_category_receipt FOREIGN KEY (category_id) REFERENCES categories(id),
 	CONSTRAINT fk_user_receipt FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
