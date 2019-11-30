@@ -56,7 +56,8 @@ func main() {
 	userService := service.NewUserService(userRepository)
 	handler.NewUserHttpHandler(mux, userService)
 
+	auth := middleware.AuthMiddleware{Conn: db}
 	mux.Use(middleware.CorsMiddleware{}.Enable)
-	mux.Use(middleware.AuthMiddleware{}.Enable)
+	mux.Use(auth.Enable)
 	http.ListenAndServe(":3000", mux)
 }
