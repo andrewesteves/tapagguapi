@@ -181,23 +181,40 @@ func (r ReceiptPostgresRepository) FindManyBy(field string, value interface{}) (
 
 // RetrieveStore a receipt
 func (r ReceiptPostgresRepository) RetrieveStore(receipt model.Receipt) (model.Receipt, error) {
+	var company model.Company
+	var category model.Category
+	var err error
 	lastInsertID := 0
-	companyRepo := NewCompanyPostgresRepository(r.Conn)
+
 	receipt.Company.User = receipt.User
-	company, err := companyRepo.Store(receipt.Company)
-	if err != nil {
-		return model.Receipt{}, err
+	receipt.Category.User = receipt.User
+
+	companyRepo := NewCompanyPostgresRepository(r.Conn)
+	company, err = companyRepo.FindBy(receipt.Company, "cnpj", receipt.Company.CNPJ)
+	if company.CNPJ == "" {
+		receipt.Company, err = companyRepo.Store(receipt.Company)
+		if err != nil {
+			return model.Receipt{}, err
+		}
+	} else {
+		receipt.Company.ID = company.ID
 	}
-	receipt.Company = company
+
 	categoryRepo := NewCategoryPostgresRepository(r.Conn)
-	receipt.Category, err = categoryRepo.Store(model.Category{
-		User:  receipt.User,
-		Title: "Geral",
-		Icon:  "all",
-	})
-	if err != nil {
-		return model.Receipt{}, err
+	category, err = categoryRepo.FindBy(receipt.Category, "title", "Geral")
+	if category.Title == "" {
+		receipt.Category, err = categoryRepo.Store(model.Category{
+			User:  receipt.User,
+			Title: "Geral",
+			Icon:  "all",
+		})
+		if err != nil {
+			return model.Receipt{}, err
+		}
+	} else {
+		receipt.Category.ID = category.ID
 	}
+
 	err = r.Conn.QueryRow("INSERT INTO receipts (category_id, company_id, user_id, title, tax, discount, extra, total, url, access_key, issued_at, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,now(),now()) RETURNING id", receipt.Category.ID, receipt.Company.ID, receipt.User.ID, receipt.Title, receipt.Tax, receipt.Discount, receipt.Extra, receipt.Total, receipt.URL, receipt.AccessKey, receipt.IssuedAt).Scan(&lastInsertID)
 	if err != nil {
 		return model.Receipt{}, err

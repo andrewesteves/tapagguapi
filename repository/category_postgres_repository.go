@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/andrewesteves/tapagguapi/model"
 )
@@ -90,4 +91,13 @@ func (r CategoryPostgresRepository) Destroy(id int64) (model.Category, error) {
 	}
 	rs.Exec(id)
 	return u, nil
+}
+
+// FindBy category
+func (r CategoryPostgresRepository) FindBy(category model.Category, field string, value interface{}) (model.Category, error) {
+	err := r.Conn.QueryRow(fmt.Sprintf("SELECT id, title, icon FROM categories WHERE %s = $1 AND user_id = $2", field), value, category.User.ID).Scan(&category.ID, &category.Title, &category.Icon)
+	if err != nil {
+		return model.Category{}, err
+	}
+	return category, nil
 }

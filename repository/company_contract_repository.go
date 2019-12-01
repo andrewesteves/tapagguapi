@@ -9,4 +9,5 @@ type CompanyContractRepository interface {
 	Store(c model.Company) (model.Company, error)
 	Update(c model.Company) (model.Company, error)
 	Destroy(int int64) (model.Company, error)
+	FindBy(c model.Company, field string, value interface{}) (model.Company, error)
 }

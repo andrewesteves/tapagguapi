@@ -9,4 +9,5 @@ type CategoryContractRepository interface {
 	Store(c model.Category) (model.Category, error)
 	Update(c model.Category) (model.Category, error)
 	Destroy(int int64) (model.Category, error)
+	FindBy(c model.Category, field string, value interface{}) (model.Category, error)
 }

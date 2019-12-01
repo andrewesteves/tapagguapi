@@ -137,8 +137,17 @@ func (rh ReceiptHTTPHandler) Retrieve() http.HandlerFunc {
 		data, err := common.GetURL(r.URL.Query().Get("url"))
 		if err != nil {
 			log.Printf("Failed to get XML: %v", err)
+			return
 		}
 		xml.Unmarshal(data, &receipt)
+		if receipt.Total < 0.1 {
+			w.Header().Add("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			json.NewEncoder(w).Encode(map[string]string{
+				"message": "The receipt was not found",
+			})
+			return
+		}
 		receipt.User = *middleware.GetUser(r.Context())
 		rpt, err := rh.Rs.RetrieveStore(receipt)
 		if err != nil {
