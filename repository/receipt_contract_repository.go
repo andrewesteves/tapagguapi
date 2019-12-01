@@ -10,5 +10,6 @@ type ReceiptContractRepository interface {
 	Update(r model.Receipt) (model.Receipt, error)
 	Destroy(int int64) (model.Receipt, error)
 	FindManyBy(field string, value interface{}) ([]model.Receipt, error)
+	RetrieveStore(r model.Receipt) (model.Receipt, error)
 	Count(user model.User) (int, error)
 }

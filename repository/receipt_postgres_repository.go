@@ -49,7 +49,7 @@ func (r ReceiptPostgresRepository) All(user model.User) ([]model.Receipt, error)
 	return receipts, nil
 }
 
-// Find an receipt
+// Find a receipt
 func (r ReceiptPostgresRepository) Find(id int64) (model.Receipt, error) {
 	var receipt model.Receipt
 	err := r.Conn.QueryRow("SELECT id, category_id, company_id, title, tax, discount, extra, total, url, access_key, issued_at, created_at, updated_at FROM receipts WHERE id = $1", id).Scan(&receipt.ID, &receipt.Category.ID, &receipt.Company.ID, &receipt.Title, &receipt.Tax, &receipt.Discount, &receipt.Extra, &receipt.Total, &receipt.URL, &receipt.AccessKey, &receipt.IssuedAt, &receipt.CreatedAt, &receipt.UpdatedAt)
@@ -68,7 +68,7 @@ func (r ReceiptPostgresRepository) Find(id int64) (model.Receipt, error) {
 	return receipt, nil
 }
 
-// Store an receipt
+// Store a receipt
 func (r ReceiptPostgresRepository) Store(receipt model.Receipt) (model.Receipt, error) {
 	lastInsertID := 0
 	err := r.Conn.QueryRow("INSERT INTO receipts (category_id, company_id, user_id, title, tax, discount, extra, total, url, access_key, issued_at, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,now(),now()) RETURNING id", receipt.Category.ID, receipt.Company.ID, receipt.User.ID, receipt.Title, receipt.Tax, receipt.Discount, receipt.Extra, receipt.Total, receipt.URL, receipt.AccessKey, receipt.IssuedAt).Scan(&lastInsertID)
@@ -109,7 +109,7 @@ func (r ReceiptPostgresRepository) Store(receipt model.Receipt) (model.Receipt, 
 	return receipt, nil
 }
 
-// Update an receipt
+// Update a receipt
 func (r ReceiptPostgresRepository) Update(receipt model.Receipt) (model.Receipt, error) {
 	rcpt, err := r.Find(receipt.ID)
 	if err != nil {
@@ -166,6 +166,63 @@ func (r ReceiptPostgresRepository) FindManyBy(field string, value interface{}) (
 	}
 
 	return receipts, nil
+}
+
+// RetrieveStore a receipt
+func (r ReceiptPostgresRepository) RetrieveStore(receipt model.Receipt) (model.Receipt, error) {
+	lastInsertID := 0
+	companyRepo := NewCompanyPostgresRepository(r.Conn)
+	receipt.Company.User = receipt.User
+	company, err := companyRepo.Store(receipt.Company)
+	if err != nil {
+		return model.Receipt{}, err
+	}
+	receipt.Company = company
+	categoryRepo := NewCategoryPostgresRepository(r.Conn)
+	receipt.Category, err = categoryRepo.Store(model.Category{
+		User:  receipt.User,
+		Title: "Geral",
+		Icon:  "all",
+	})
+	if err != nil {
+		return model.Receipt{}, err
+	}
+	err = r.Conn.QueryRow("INSERT INTO receipts (category_id, company_id, user_id, title, tax, discount, extra, total, url, access_key, issued_at, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,now(),now()) RETURNING id", receipt.Category.ID, receipt.Company.ID, receipt.User.ID, receipt.Title, receipt.Tax, receipt.Discount, receipt.Extra, receipt.Total, receipt.URL, receipt.AccessKey, receipt.IssuedAt).Scan(&lastInsertID)
+	if err != nil {
+		return model.Receipt{}, err
+	}
+	receipt.ID = int64(lastInsertID)
+
+	if len(receipt.Items) > 0 {
+		txn, err := r.Conn.Begin()
+		if err != nil {
+			return model.Receipt{}, err
+		}
+		stmt, err := txn.Prepare(pq.CopyIn("items", "receipt_id", "title", "price", "quantity", "total", "tax", "measure", "created_at", "updated_at"))
+		if err != nil {
+			return model.Receipt{}, err
+		}
+		for _, item := range receipt.Items {
+			_, err = stmt.Exec(receipt.ID, item.Title, item.Price, item.Quantity, item.Total, item.Tax, item.Measure, time.Now(), time.Now())
+			if err != nil {
+				return model.Receipt{}, err
+			}
+		}
+		_, err = stmt.Exec()
+		if err != nil {
+			return model.Receipt{}, err
+		}
+		err = stmt.Close()
+		if err != nil {
+			return model.Receipt{}, err
+		}
+		err = txn.Commit()
+		if err != nil {
+			return model.Receipt{}, err
+		}
+	}
+
+	return receipt, nil
 }
 
 // Count receipts

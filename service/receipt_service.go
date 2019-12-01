@@ -68,3 +68,12 @@ func (r ReceiptService) FindManyBy(field string, value interface{}) ([]model.Rec
 	}
 	return receipts, nil
 }
+
+// RetrieveStore receipt service
+func (r ReceiptService) RetrieveStore(receipt model.Receipt) (model.Receipt, error) {
+	receipt, err := r.receiptRepository.RetrieveStore(receipt)
+	if err != nil {
+		return model.Receipt{}, err
+	}
+	return receipt, nil
+}

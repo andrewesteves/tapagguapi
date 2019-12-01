@@ -132,7 +132,8 @@ func (rh ReceiptHTTPHandler) Retrieve() http.HandlerFunc {
 			log.Printf("Failed to get XML: %v", err)
 		}
 		xml.Unmarshal(data, &receipt)
-		rpt, err := rh.Rs.Store(receipt)
+		receipt.User = *middleware.GetUser(r.Context())
+		rpt, err := rh.Rs.RetrieveStore(receipt)
 		if err != nil {
 			log.Printf("Failed to store: %v", err)
 		}
