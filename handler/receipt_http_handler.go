@@ -12,7 +12,7 @@ import (
 	"github.com/andrewesteves/tapagguapi/middleware"
 	"github.com/andrewesteves/tapagguapi/model"
 	"github.com/andrewesteves/tapagguapi/service"
-	"github.com/andrewesteves/tapagguapi/transformers"
+	"github.com/andrewesteves/tapagguapi/transformer"
 	"github.com/gorilla/mux"
 )
 
@@ -44,7 +44,7 @@ func (rh ReceiptHTTPHandler) All() http.HandlerFunc {
 		}
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(transformers.ReceiptTransformer{}.TransformMany(receipts, nil))
+		json.NewEncoder(w).Encode(transformer.ReceiptTransformer{}.TransformMany(receipts, nil))
 	}
 }
 
@@ -152,6 +152,6 @@ func (rh ReceiptHTTPHandler) Query() http.HandlerFunc {
 		}
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(transformers.ReceiptTransformer{}.TransformMany(receipts, nil))
+		json.NewEncoder(w).Encode(transformer.ReceiptTransformer{}.TransformMany(receipts, nil))
 	}
 }

@@ -1,4 +1,4 @@
-package transformers
+package transformer
 
 // CommonTransformer struct
 type CommonTransformer struct {
