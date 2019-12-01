@@ -12,6 +12,7 @@ import (
 	"github.com/andrewesteves/tapagguapi/middleware"
 	"github.com/andrewesteves/tapagguapi/model"
 	"github.com/andrewesteves/tapagguapi/service"
+	"github.com/andrewesteves/tapagguapi/transformers"
 	"github.com/gorilla/mux"
 )
 
@@ -25,6 +26,7 @@ func NewReceiptHTTPHandler(mux *mux.Router, receiptService service.ReceiptContra
 	handler := &ReceiptHTTPHandler{
 		Rs: receiptService,
 	}
+	mux.HandleFunc("/receipts/query/{field}", handler.Query()).Methods("GET")
 	mux.HandleFunc("/receipts/retrieve", handler.Retrieve()).Methods("GET")
 	mux.HandleFunc("/receipts/{id}", handler.Find()).Methods("GET")
 	mux.HandleFunc("/receipts/{id}", handler.Update()).Methods("PUT")
@@ -42,7 +44,7 @@ func (rh ReceiptHTTPHandler) All() http.HandlerFunc {
 		}
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(receipts)
+		json.NewEncoder(w).Encode(transformers.ReceiptTransformer{}.TransformMany(receipts, nil))
 	}
 }
 
@@ -137,5 +139,19 @@ func (rh ReceiptHTTPHandler) Retrieve() http.HandlerFunc {
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(rpt)
+	}
+}
+
+// Query handler of a receipt
+func (rh ReceiptHTTPHandler) Query() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		receipts, err := rh.Rs.FindManyBy(vars["field"], r.URL.Query().Get("value"))
+		if err != nil {
+			panic(err.Error())
+		}
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(transformers.ReceiptTransformer{}.TransformMany(receipts, nil))
 	}
 }

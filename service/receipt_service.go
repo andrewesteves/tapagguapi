@@ -59,3 +59,12 @@ func (r ReceiptService) Destroy(id int64) (model.Receipt, error) {
 	}
 	return receipt, nil
 }
+
+// FindManyBy receipt service
+func (r ReceiptService) FindManyBy(field string, value interface{}) ([]model.Receipt, error) {
+	receipts, err := r.receiptRepository.FindManyBy(field, value)
+	if err != nil {
+		return nil, err
+	}
+	return receipts, nil
+}
