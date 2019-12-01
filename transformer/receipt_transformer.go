@@ -91,8 +91,11 @@ func (rf ReceiptTransformer) TransformMany(receipts []model.Receipt, values map[
 		}
 		newReceipts = append(newReceipts, newReceipt)
 	}
-	newData.Receipts = newReceipts
-
+	if len(newReceipts) > 0 {
+		newData.Receipts = newReceipts
+	} else {
+		newData.Receipts = make([]ReceiptTransformer, 0)
+	}
 	if current, ok := values["current"]; ok {
 		newData.Current = current
 	}

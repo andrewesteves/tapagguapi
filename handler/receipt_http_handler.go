@@ -38,7 +38,14 @@ func NewReceiptHTTPHandler(mux *mux.Router, receiptService service.ReceiptContra
 // All handler of a receipts
 func (rh ReceiptHTTPHandler) All() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		receipts, err := rh.Rs.All(*middleware.GetUser(r.Context()))
+		values := make(map[string]string)
+		if r.URL.Query().Get("month") != "" {
+			values["month"] = r.URL.Query().Get("month")
+		}
+		if r.URL.Query().Get("year") != "" {
+			values["year"] = r.URL.Query().Get("year")
+		}
+		receipts, err := rh.Rs.All(*middleware.GetUser(r.Context()), values)
 		if err != nil {
 			panic(err.Error())
 		}

@@ -16,8 +16,8 @@ func NewReceiptService(rs repository.ReceiptContractRepository) ReceiptContractS
 }
 
 // All receipts service
-func (r ReceiptService) All(user model.User) ([]model.Receipt, error) {
-	receipts, err := r.receiptRepository.All(user)
+func (r ReceiptService) All(user model.User, values map[string]string) ([]model.Receipt, error) {
+	receipts, err := r.receiptRepository.All(user, values)
 	if err != nil {
 		return nil, err
 	}
