@@ -23,19 +23,21 @@ func NewReceiptPostgresRepository(Conn *sql.DB) ReceiptContractRepository {
 // All receipts
 func (r ReceiptPostgresRepository) All(user model.User) ([]model.Receipt, error) {
 	var receipts []model.Receipt
-	rs, err := r.Conn.Query("SELECT id, category_id, title, tax, discount, extra, total, url, access_key, issued_at, created_at, updated_at FROM receipts WHERE user_id = $1 ORDER BY created_at DESC", user.ID)
+	rs, err := r.Conn.Query("SELECT id, category_id, company_id, title, tax, discount, extra, total, url, access_key, issued_at, created_at, updated_at FROM receipts WHERE user_id = $1 ORDER BY created_at DESC", user.ID)
 	if err != nil {
 		return nil, err
 	}
 
 	for rs.Next() {
 		var receipt model.Receipt
-		err = rs.Scan(&receipt.ID, &receipt.Category.ID, &receipt.Title, &receipt.Tax, &receipt.Discount, &receipt.Extra, &receipt.Total, &receipt.URL, &receipt.AccessKey, &receipt.IssuedAt, &receipt.CreatedAt, &receipt.UpdatedAt)
+		err = rs.Scan(&receipt.ID, &receipt.Category.ID, &receipt.Company.ID, &receipt.Title, &receipt.Tax, &receipt.Discount, &receipt.Extra, &receipt.Total, &receipt.URL, &receipt.AccessKey, &receipt.IssuedAt, &receipt.CreatedAt, &receipt.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
 		categoryRepo := NewCategoryPostgresRepository(r.Conn)
 		receipt.Category, _ = categoryRepo.Find(receipt.Category.ID)
+		companyRepo := NewCompanyPostgresRepository(r.Conn)
+		receipt.Company, _ = companyRepo.Find(receipt.Company.ID)
 		itemRepo := NewItemPostgresRepository(r.Conn)
 		receipt.Items, _ = itemRepo.All(receipt.ID)
 		if len(receipt.Items) < 1 {
@@ -50,7 +52,16 @@ func (r ReceiptPostgresRepository) All(user model.User) ([]model.Receipt, error)
 // Find an receipt
 func (r ReceiptPostgresRepository) Find(id int64) (model.Receipt, error) {
 	var receipt model.Receipt
-	err := r.Conn.QueryRow("SELECT id, title, tax, discount, extra, total, url, access_key, issued_at, created_at, updated_at FROM receipts WHERE id = $1", id).Scan(&receipt.ID, &receipt.Title, &receipt.Tax, &receipt.Discount, &receipt.Extra, &receipt.Total, &receipt.URL, &receipt.AccessKey, &receipt.IssuedAt, &receipt.CreatedAt, &receipt.UpdatedAt)
+	err := r.Conn.QueryRow("SELECT id, category_id, company_id, title, tax, discount, extra, total, url, access_key, issued_at, created_at, updated_at FROM receipts WHERE id = $1", id).Scan(&receipt.ID, &receipt.Category.ID, &receipt.Company.ID, &receipt.Title, &receipt.Tax, &receipt.Discount, &receipt.Extra, &receipt.Total, &receipt.URL, &receipt.AccessKey, &receipt.IssuedAt, &receipt.CreatedAt, &receipt.UpdatedAt)
+	categoryRepo := NewCategoryPostgresRepository(r.Conn)
+	receipt.Category, _ = categoryRepo.Find(receipt.Category.ID)
+	companyRepo := NewCompanyPostgresRepository(r.Conn)
+	receipt.Company, _ = companyRepo.Find(receipt.Company.ID)
+	itemRepo := NewItemPostgresRepository(r.Conn)
+	receipt.Items, _ = itemRepo.All(receipt.ID)
+	if len(receipt.Items) < 1 {
+		receipt.Items = make([]model.Item, 0)
+	}
 	if err != nil {
 		return model.Receipt{}, err
 	}
@@ -60,7 +71,7 @@ func (r ReceiptPostgresRepository) Find(id int64) (model.Receipt, error) {
 // Store an receipt
 func (r ReceiptPostgresRepository) Store(receipt model.Receipt) (model.Receipt, error) {
 	lastInsertID := 0
-	err := r.Conn.QueryRow("INSERT INTO receipts (category_id, user_id, title, tax, discount, extra, total, url, access_key, issued_at, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,now(),now()) RETURNING id", receipt.Category.ID, receipt.User.ID, receipt.Title, receipt.Tax, receipt.Discount, receipt.Extra, receipt.Total, receipt.URL, receipt.AccessKey, receipt.IssuedAt).Scan(&lastInsertID)
+	err := r.Conn.QueryRow("INSERT INTO receipts (category_id, company_id, user_id, title, tax, discount, extra, total, url, access_key, issued_at, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,now(),now()) RETURNING id", receipt.Category.ID, receipt.Company.ID, receipt.User.ID, receipt.Title, receipt.Tax, receipt.Discount, receipt.Extra, receipt.Total, receipt.URL, receipt.AccessKey, receipt.IssuedAt).Scan(&lastInsertID)
 	if err != nil {
 		return model.Receipt{}, err
 	}

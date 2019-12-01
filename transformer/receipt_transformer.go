@@ -6,10 +6,15 @@ import (
 	"github.com/andrewesteves/tapagguapi/model"
 )
 
-// ReceiptDataTransformer struct
-type ReceiptDataTransformer struct {
-	Receips []ReceiptTransformer `json:"receipts"`
+// ReceiptDataManyTransformer struct
+type ReceiptDataManyTransformer struct {
+	Receipts []ReceiptTransformer `json:"receipts"`
 	CommonTransformer
+}
+
+// ReceiptDataOneTransformer struct
+type ReceiptDataOneTransformer struct {
+	Receipt ReceiptTransformer `json:"receipt"`
 }
 
 // ReceiptTransformer struct
@@ -30,10 +35,39 @@ type ReceiptTransformer struct {
 	UpdatedAt time.Time    `json:"updatedAt"`
 }
 
-// TransformMany receipt specified JSON
-func (rf ReceiptTransformer) TransformMany(receipts []model.Receipt, values map[string]string) ReceiptDataTransformer {
+// TransformOne receipt specified JSON
+func (rf ReceiptTransformer) TransformOne(receipt model.Receipt, values map[string]string) ReceiptDataOneTransformer {
 	var newReceipts []ReceiptTransformer
-	var newData ReceiptDataTransformer
+	var newData ReceiptDataOneTransformer
+	var newReceipt ReceiptTransformer
+	newReceipt.ID = receipt.ID
+	newReceipt.Company = receipt.Company
+	newReceipt.Title = receipt.Title
+	newReceipt.Tax = receipt.Tax
+	newReceipt.Extra = receipt.Extra
+	newReceipt.Discount = receipt.Discount
+	newReceipt.Total = receipt.Total
+	newReceipt.Items = receipt.Items
+	newReceipt.URL = receipt.URL
+	newReceipt.AccessKey = receipt.AccessKey
+	newReceipt.IssuedAt = receipt.IssuedAt
+	newReceipt.CreatedAt = receipt.CreatedAt
+	newReceipt.UpdatedAt = receipt.UpdatedAt
+	if receipt.Category.ID > 0 {
+		newReceipt.Category = CategoryTransformer{}.TransformOne(receipt.Category)
+	}
+	if receipt.Company.ID > 0 {
+		newReceipt.Company = CompanyTransformer{}.TransformOne(receipt.Company)
+	}
+	newReceipts = append(newReceipts, newReceipt)
+	newData.Receipt = newReceipt
+	return newData
+}
+
+// TransformMany receipt specified JSON
+func (rf ReceiptTransformer) TransformMany(receipts []model.Receipt, values map[string]string) ReceiptDataManyTransformer {
+	var newReceipts []ReceiptTransformer
+	var newData ReceiptDataManyTransformer
 	for _, receipt := range receipts {
 		var newReceipt ReceiptTransformer
 		newReceipt.ID = receipt.ID
@@ -52,9 +86,12 @@ func (rf ReceiptTransformer) TransformMany(receipts []model.Receipt, values map[
 		if receipt.Category.ID > 0 {
 			newReceipt.Category = CategoryTransformer{}.TransformOne(receipt.Category)
 		}
+		if receipt.Company.ID > 0 {
+			newReceipt.Company = CompanyTransformer{}.TransformOne(receipt.Company)
+		}
 		newReceipts = append(newReceipts, newReceipt)
 	}
-	newData.Receips = newReceipts
+	newData.Receipts = newReceipts
 
 	if current, ok := values["current"]; ok {
 		newData.Current = current

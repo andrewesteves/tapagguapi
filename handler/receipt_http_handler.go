@@ -62,7 +62,7 @@ func (rh ReceiptHTTPHandler) Find() http.HandlerFunc {
 		}
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(receipt)
+		json.NewEncoder(w).Encode(transformer.ReceiptTransformer{}.TransformOne(receipt, nil))
 	}
 }
 
