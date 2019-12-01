@@ -2,9 +2,10 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/andrewesteves/tapagguapi/handler"
@@ -15,17 +16,8 @@ import (
 	_ "github.com/lib/pq"
 )
 
-const (
-	host     = "localhost"
-	port     = 5432
-	user     = "root"
-	password = "4321"
-	dbname   = "tapaggu"
-	sslmode  = "disable"
-)
-
 func main() {
-	db, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s", host, port, user, password, dbname, sslmode))
+	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		panic(err.Error())
 	}
@@ -67,5 +59,11 @@ func main() {
 	auth := middleware.AuthMiddleware{Conn: db}
 	mux.Use(middleware.CorsMiddleware{}.Enable)
 	mux.Use(auth.Enable)
-	http.ListenAndServe(":3000", mux)
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		log.Fatal("PORT must be set")
+	}
+
+	log.Println(http.ListenAndServe(":"+port, mux))
 }
