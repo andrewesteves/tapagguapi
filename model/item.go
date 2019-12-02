@@ -2,6 +2,7 @@ package model
 
 import "time"
 
+// Item model
 type Item struct {
 	ID        int64     `json:"id"`
 	Title     string    `json:"title" xml:"prod>xProd"`

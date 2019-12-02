@@ -2,9 +2,11 @@ package main
 
 import (
 	"database/sql"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
-	"log"
+	"strings"
 
 	"github.com/andrewesteves/tapagguapi/handler"
 	"github.com/andrewesteves/tapagguapi/middleware"
@@ -16,26 +18,52 @@ import (
 
 func main() {
 	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
-	
 	if err != nil {
-		log.Fatalf("Error opening database: %q", err)
+		panic(err.Error())
+	}
+	defer db.Close()
+
+	file, err := ioutil.ReadFile("db.sql")
+	if err != nil {
+		panic(err.Error())
+	}
+	stmt := strings.Split(string(file), ";")
+	for _, s := range stmt {
+		_, err := db.Exec(s)
+		if err != nil {
+			panic(err.Error())
+		}
 	}
 
-	mux := mux.NewRouter()
+	mux := mux.NewRouter().StrictSlash(true)
 	receiptRepository := repository.NewReceiptPostgresRepository(db)
 	receiptService := service.NewReceiptService(receiptRepository)
-	handler.NewReceiptHttpHandler(mux, receiptService)
+	handler.NewReceiptHTTPHandler(mux, receiptService)
 
 	itemRepository := repository.NewItemPostgresRepository(db)
-	itemService := service.ItemContractService(itemRepository)
-	handler.NewItemHttpHandler(mux, itemService)
+	itemService := service.NewItemService(itemRepository)
+	handler.NewItemHTTPHandler(mux, itemService)
 
+	userRepository := repository.NewUserPostgresRepository(db)
+	userService := service.NewUserService(userRepository)
+	handler.NewUserHTTPHandler(mux, userService)
+
+	categoryRepository := repository.NewCategoryPostgresRepository(db)
+	categoryService := service.NewCategoryService(categoryRepository)
+	handler.NewCategoryHTTPHandler(mux, categoryService)
+
+	companyRepository := repository.NewCompanyPostgresRepository(db)
+	companyService := service.NewCompanyService(companyRepository)
+	handler.NewCompanyHTTPHandler(mux, companyService)
+
+	auth := middleware.AuthMiddleware{Conn: db}
 	mux.Use(middleware.CorsMiddleware{}.Enable)
+	mux.Use(auth.Enable)
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		log.Fatal("$PORT must be set")
+		log.Fatal("PORT must be set")
 	}
 
-	log.Println(http.ListenAndServe(":" + port, mux))
+	log.Println(http.ListenAndServe(":"+port, mux))
 }
