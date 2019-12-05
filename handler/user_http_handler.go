@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -70,14 +71,22 @@ func (uh UserHTTPHandler) Store() http.HandlerFunc {
 		json.Unmarshal(reqBody, &user)
 		user, err := uh.Us.Store(user)
 		if err != nil {
-			panic(err.Error())
+			log.Println(err.Error())
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			json.NewEncoder(w).Encode(map[string]string{
+				"message": err.Error(),
+			})
+			return
 		}
-		err = service.Mailer{}.Send([]string{user.Email}, "welcome")
+		err = service.Mailer{}.Send([]string{user.Email}, "welcome", []string{})
 		if err != nil {
-			panic(err.Error())
+			log.Println(err.Error())
+			w.WriteHeader(http.StatusServiceUnavailable)
+			json.NewEncoder(w).Encode(map[string]string{
+				"message": err.Error(),
+			})
+			return
 		}
-		user.Password = ""
-
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(user)
 	}
@@ -129,13 +138,13 @@ func (uh UserHTTPHandler) Login() http.HandlerFunc {
 		var user model.User
 		reqBody, _ := ioutil.ReadAll(r.Body)
 		json.Unmarshal(reqBody, &user)
-
 		u, err := uh.Us.Login(user)
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(w).Encode(nil)
+			json.NewEncoder(w).Encode(map[string]string{
+				"message": err.Error(),
+			})
 		} else {
-			u.Password = ""
 			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(u)
 		}
@@ -166,11 +175,23 @@ func (uh UserHTTPHandler) Recover() http.HandlerFunc {
 		var user model.User
 		reqBody, _ := ioutil.ReadAll(r.Body)
 		json.Unmarshal(reqBody, &user)
-		err := service.Mailer{}.Send([]string{user.Email}, "recover")
+		dUser, err := uh.Us.FindBy("email", user.Email)
 		if err != nil {
-			panic(err.Error())
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(map[string]string{
+				"message": err.Error(),
+			})
+			return
 		}
-
+		err = service.Mailer{}.Send([]string{user.Email}, "recover", []string{dUser.Email, dUser.Token})
+		if err != nil {
+			log.Println(err.Error())
+			w.WriteHeader(http.StatusServiceUnavailable)
+			json.NewEncoder(w).Encode(map[string]string{
+				"message": err.Error(),
+			})
+			return
+		}
 		w.WriteHeader(http.StatusOK)
 	}
 }
