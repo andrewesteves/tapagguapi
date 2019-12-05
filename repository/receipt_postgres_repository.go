@@ -23,17 +23,35 @@ func NewReceiptPostgresRepository(Conn *sql.DB) ReceiptContractRepository {
 // All receipts
 func (r ReceiptPostgresRepository) All(user model.User, values map[string]string) ([]model.Receipt, error) {
 	var receipts []model.Receipt
-	var query string
 	var rs *sql.Rows
 	var err error
+	args := []interface{}{user.ID}
+	i := 2
 
-	if len(values) == 2 {
-		query = "SELECT id, category_id, company_id, title, tax, discount, extra, total, url, access_key, issued_at, created_at, updated_at FROM receipts WHERE user_id = $1 AND (EXTRACT (MONTH FROM issued_at) = $2) AND (EXTRACT (YEAR FROM issued_at) = $3) ORDER BY created_at DESC"
-		rs, err = r.Conn.Query(query, user.ID, values["month"], values["year"])
+	query := "SELECT id, category_id, company_id, title, tax, discount, extra, total, url, access_key, issued_at, created_at, updated_at FROM receipts WHERE user_id = $1 "
+
+	if len(values) == 0 {
+		query += "AND (EXTRACT (MONTH FROM issued_at) = EXTRACT (MONTH FROM CURRENT_DATE)) AND (EXTRACT (YEAR FROM issued_at) = EXTRACT (YEAR FROM CURRENT_DATE)) "
 	} else {
-		query = "SELECT id, category_id, company_id, title, tax, discount, extra, total, url, access_key, issued_at, created_at, updated_at FROM receipts WHERE user_id = $1 AND (EXTRACT (MONTH FROM issued_at) = EXTRACT (MONTH FROM CURRENT_DATE)) AND (EXTRACT (YEAR FROM issued_at) = EXTRACT (YEAR FROM CURRENT_DATE)) ORDER BY created_at DESC"
-		rs, err = r.Conn.Query(query, user.ID)
+		if ct, ok := values["category"]; ok {
+			args = append(args, ct)
+			query += fmt.Sprintf("AND category_id = $%d ", i)
+			i++
+		}
+		if mt, ok := values["month"]; ok {
+			args = append(args, mt)
+			query += fmt.Sprintf("AND (EXTRACT (MONTH FROM issued_at) = $%d) ", i)
+			i++
+		}
+		if yr, ok := values["year"]; ok {
+			args = append(args, yr)
+			query += fmt.Sprintf("AND (EXTRACT (YEAR FROM issued_at) = $%d) ", i)
+		}
 	}
+
+	query += "ORDER BY created_at DESC"
+
+	rs, err = r.Conn.Query(query, args...)
 
 	if err != nil {
 		return nil, err

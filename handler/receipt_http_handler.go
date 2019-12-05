@@ -45,6 +45,9 @@ func (rh ReceiptHTTPHandler) All() http.HandlerFunc {
 		if r.URL.Query().Get("year") != "" {
 			values["year"] = r.URL.Query().Get("year")
 		}
+		if r.URL.Query().Get("category") != "" {
+			values["category"] = r.URL.Query().Get("category")
+		}
 		receipts, err := rh.Rs.All(*middleware.GetUser(r.Context()), values)
 		if err != nil {
 			panic(err.Error())
