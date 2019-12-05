@@ -21,6 +21,7 @@ func NewUserHTTPHandler(mux *mux.Router, userService service.UserContractService
 	handler := &UserHTTPHandler{
 		Us: userService,
 	}
+	mux.HandleFunc("/users/recover", handler.Recover()).Methods("POST")
 	mux.HandleFunc("/users/login", handler.Login()).Methods("POST")
 	mux.HandleFunc("/users/logout", handler.Logout()).Methods("POST")
 	mux.HandleFunc("/users/{id}", handler.Find()).Methods("GET")
@@ -71,9 +72,13 @@ func (uh UserHTTPHandler) Store() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
+		err = service.Mailer{}.Send([]string{user.Email}, "welcome")
+		if err != nil {
+			panic(err.Error())
+		}
+		user.Password = ""
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		user.Password = ""
 		json.NewEncoder(w).Encode(user)
 	}
 }
@@ -152,5 +157,20 @@ func (uh UserHTTPHandler) Logout() http.HandlerFunc {
 			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(model.User{})
 		}
+	}
+}
+
+// Recover password
+func (uh UserHTTPHandler) Recover() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var user model.User
+		reqBody, _ := ioutil.ReadAll(r.Body)
+		json.Unmarshal(reqBody, &user)
+		err := service.Mailer{}.Send([]string{user.Email}, "recover")
+		if err != nil {
+			panic(err.Error())
+		}
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
 	}
 }
