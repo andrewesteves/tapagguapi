@@ -12,13 +12,6 @@ import (
 	"github.com/andrewesteves/tapagguapi/config"
 )
 
-const (
-	hostname = "smtp.gmail.com"
-	username = "tapaggu@gmail.com"
-	password = "T4d3m4is"
-	from     = "andrew@digitalnativa.com.br"
-)
-
 // Mailer struct
 type Mailer struct{}
 
