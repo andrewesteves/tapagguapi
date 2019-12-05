@@ -39,7 +39,7 @@ func (ih ItemHTTPHandler) All() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(items)
 	}
@@ -57,7 +57,7 @@ func (ih ItemHTTPHandler) Find() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(item)
 	}
@@ -75,7 +75,7 @@ func (ih ItemHTTPHandler) Store() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(item)
 	}
@@ -97,7 +97,7 @@ func (ih ItemHTTPHandler) Update() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(item)
 	}
@@ -115,7 +115,7 @@ func (ih ItemHTTPHandler) Destroy() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(item)
 	}

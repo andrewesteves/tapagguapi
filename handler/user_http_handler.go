@@ -38,7 +38,7 @@ func (uh UserHTTPHandler) All() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(users)
 	}
@@ -56,7 +56,7 @@ func (uh UserHTTPHandler) Find() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(user)
 	}
@@ -77,7 +77,7 @@ func (uh UserHTTPHandler) Store() http.HandlerFunc {
 			panic(err.Error())
 		}
 		user.Password = ""
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(user)
 	}
@@ -99,7 +99,7 @@ func (uh UserHTTPHandler) Update() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(user)
 	}
@@ -117,7 +117,7 @@ func (uh UserHTTPHandler) Destroy() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(user)
 	}
@@ -129,7 +129,7 @@ func (uh UserHTTPHandler) Login() http.HandlerFunc {
 		var user model.User
 		reqBody, _ := ioutil.ReadAll(r.Body)
 		json.Unmarshal(reqBody, &user)
-		w.Header().Add("Content-Type", "application/json")
+
 		u, err := uh.Us.Login(user)
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
@@ -148,7 +148,7 @@ func (uh UserHTTPHandler) Logout() http.HandlerFunc {
 		var user model.User
 		reqBody, _ := ioutil.ReadAll(r.Body)
 		json.Unmarshal(reqBody, &user)
-		w.Header().Add("Content-Type", "application/json")
+
 		_, err := uh.Us.Logout(user)
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
@@ -170,7 +170,7 @@ func (uh UserHTTPHandler) Recover() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 	}
 }

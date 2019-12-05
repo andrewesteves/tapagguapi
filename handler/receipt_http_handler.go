@@ -49,7 +49,7 @@ func (rh ReceiptHTTPHandler) All() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(transformer.ReceiptTransformer{}.TransformMany(receipts, nil))
 	}
@@ -67,7 +67,7 @@ func (rh ReceiptHTTPHandler) Find() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(transformer.ReceiptTransformer{}.TransformOne(receipt, nil))
 	}
@@ -84,7 +84,7 @@ func (rh ReceiptHTTPHandler) Store() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(receipt)
 	}
@@ -106,7 +106,7 @@ func (rh ReceiptHTTPHandler) Update() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(receipt)
 	}
@@ -124,7 +124,7 @@ func (rh ReceiptHTTPHandler) Destroy() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(receipt)
 	}
@@ -141,7 +141,7 @@ func (rh ReceiptHTTPHandler) Retrieve() http.HandlerFunc {
 		}
 		xml.Unmarshal(data, &receipt)
 		if receipt.Total < 0.1 {
-			w.Header().Add("Content-Type", "application/json")
+
 			w.WriteHeader(http.StatusUnprocessableEntity)
 			json.NewEncoder(w).Encode(map[string]string{
 				"message": "The receipt was not found",
@@ -153,7 +153,7 @@ func (rh ReceiptHTTPHandler) Retrieve() http.HandlerFunc {
 		if err != nil {
 			log.Printf("Failed to store: %v", err)
 		}
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(rpt)
 	}
@@ -167,7 +167,7 @@ func (rh ReceiptHTTPHandler) Query() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(transformer.ReceiptTransformer{}.TransformMany(receipts, nil))
 	}

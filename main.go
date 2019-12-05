@@ -67,5 +67,6 @@ func main() {
 	auth := middleware.AuthMiddleware{Conn: db}
 	mux.Use(middleware.CorsMiddleware{}.Enable)
 	mux.Use(auth.Enable)
+	mux.Use(middleware.ContentMiddleware{}.Enable)
 	http.ListenAndServe(":3000", mux)
 }
