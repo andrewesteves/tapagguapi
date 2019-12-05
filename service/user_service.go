@@ -2,8 +2,10 @@ package service
 
 import (
 	"encoding/base64"
+	"errors"
 	"time"
 
+	"github.com/andrewesteves/tapagguapi/config"
 	"github.com/andrewesteves/tapagguapi/model"
 	"github.com/andrewesteves/tapagguapi/repository"
 	"golang.org/x/crypto/bcrypt"
@@ -39,6 +41,10 @@ func (u UserService) Find(id int64) (model.User, error) {
 
 // Store user service
 func (u UserService) Store(user model.User) (model.User, error) {
+	uFind, _ := u.userRepository.FindBy("email", user.Email)
+	if uFind.Name != "" {
+		return model.User{}, errors.New(config.LangConfig{}.I18n()["email_taken"])
+	}
 	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		panic(err.Error())
@@ -80,7 +86,7 @@ func (u UserService) Destroy(id int64) (model.User, error) {
 func (u UserService) FindBy(field string, value interface{}) (model.User, error) {
 	user, err := u.userRepository.FindBy(field, value)
 	if err != nil {
-		return model.User{}, err
+		return model.User{}, errors.New(config.LangConfig{}.I18n()["email_invalid"])
 	}
 	return user, nil
 }
@@ -89,18 +95,17 @@ func (u UserService) FindBy(field string, value interface{}) (model.User, error)
 func (u UserService) Login(user model.User) (model.User, error) {
 	dUser, err := u.userRepository.FindBy("email", user.Email)
 	if err != nil {
-		return model.User{}, err
+		return model.User{}, errors.New(config.LangConfig{}.I18n()["auth_failed"])
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(dUser.Password), []byte(user.Password))
 	if err != nil {
-		return model.User{}, err
+		return model.User{}, errors.New(config.LangConfig{}.I18n()["auth_failed"])
 	}
 	dUser.Token = generateToken(dUser.Password)
 	dUser, err = u.userRepository.Update(dUser)
 	if err != nil {
 		return model.User{}, err
 	}
-	dUser.Password = ""
 	return dUser, nil
 }
 
@@ -110,11 +115,11 @@ func (u UserService) Logout(user model.User) (model.User, error) {
 	if err != nil {
 		return model.User{}, err
 	}
-	dUser.Token = "NULL"
+	dUser.Token = generateToken(user.Email)
 	dUser, err = u.userRepository.Update(dUser)
 	return user, nil
 }
 
-func generateToken(password string) string {
-	return base64.StdEncoding.EncodeToString([]byte(password + time.Now().UTC().Format(time.RFC850)))
+func generateToken(value string) string {
+	return base64.StdEncoding.EncodeToString([]byte(value + time.Now().UTC().Format(time.RFC850)))
 }

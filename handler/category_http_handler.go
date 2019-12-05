@@ -36,7 +36,7 @@ func (rh CategoryHTTPHandler) All() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(categories)
 	}
@@ -54,7 +54,7 @@ func (rh CategoryHTTPHandler) Find() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(category)
 	}
@@ -71,7 +71,7 @@ func (rh CategoryHTTPHandler) Store() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(category)
 	}
@@ -93,7 +93,7 @@ func (rh CategoryHTTPHandler) Update() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(category)
 	}
@@ -111,7 +111,7 @@ func (rh CategoryHTTPHandler) Destroy() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(category)
 	}

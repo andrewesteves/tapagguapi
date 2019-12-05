@@ -36,7 +36,7 @@ func (rh CompanyHTTPHandler) All() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(companies)
 	}
@@ -54,7 +54,7 @@ func (rh CompanyHTTPHandler) Find() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(company)
 	}
@@ -71,7 +71,7 @@ func (rh CompanyHTTPHandler) Store() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(company)
 	}
@@ -93,7 +93,7 @@ func (rh CompanyHTTPHandler) Update() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(company)
 	}
@@ -111,7 +111,7 @@ func (rh CompanyHTTPHandler) Destroy() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-		w.Header().Add("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(company)
 	}

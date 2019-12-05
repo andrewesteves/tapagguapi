@@ -6,24 +6,27 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// Env struct
-type Env struct {
+// EnvConfig struct
+type EnvConfig struct {
 	Mail struct {
 		Hostname string `yaml:"hostname"`
 		Username string `yaml:"username"`
 		Password string `yaml:"password"`
 		From     string `yaml:"from"`
 	}
+	Idiom struct {
+		Lang string `yaml:"lang"`
+	}
 }
 
 // Vars configuration
-func (env Env) Vars() (Env, error) {
+func (env EnvConfig) Vars() (EnvConfig, error) {
 	f, err := os.Open("env.yml")
 	if err != nil {
 		return env, err
 	}
 
-	var e Env
+	var e EnvConfig
 	decoder := yaml.NewDecoder(f)
 	err = decoder.Decode(&e)
 	if err != nil {

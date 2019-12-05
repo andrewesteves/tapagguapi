@@ -16,6 +16,15 @@ import (
 	_ "github.com/lib/pq"
 )
 
+const (
+	host     = "localhost"
+	port     = 5432
+	user     = "root"
+	password = "4321"
+	dbname   = "tapaggu"
+	sslmode  = "disable"
+)
+
 func main() {
 	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
@@ -59,11 +68,11 @@ func main() {
 	auth := middleware.AuthMiddleware{Conn: db}
 	mux.Use(middleware.CorsMiddleware{}.Enable)
 	mux.Use(auth.Enable)
+	mux.Use(middleware.ContentMiddleware{}.Enable)
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		log.Fatal("PORT must be set")
 	}
-
 	log.Println(http.ListenAndServe(":"+port, mux))
 }
