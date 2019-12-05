@@ -58,6 +58,7 @@ func guard(r *http.Request) bool {
 	accessable := []string{
 		"/users-POST",
 		"/users/login-POST",
+		"/users/recover-POST",
 	}
 	return !contains(accessable, fmt.Sprintf("%s-%s", r.RequestURI, r.Method))
 }

@@ -7,4 +7,5 @@ require (
 	github.com/gorilla/mux v1.7.3
 	github.com/lib/pq v1.2.0
 	golang.org/x/crypto v0.0.0-20191122220453-ac88ee75c92c
+	gopkg.in/yaml.v2 v2.2.7
 )
