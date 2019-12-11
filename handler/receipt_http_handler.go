@@ -72,7 +72,7 @@ func (rh ReceiptHTTPHandler) Find() http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(transformer.ReceiptTransformer{}.TransformOne(receipt, nil))
+		json.NewEncoder(w).Encode(transformer.ReceiptTransformer{}.TransformOne(receipt))
 	}
 }
 
@@ -156,9 +156,9 @@ func (rh ReceiptHTTPHandler) Retrieve() http.HandlerFunc {
 		if err != nil {
 			log.Printf("Failed to store: %v", err)
 		}
-
+		dReceipt, err := rh.Rs.Find(rpt.ID)
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(rpt)
+		json.NewEncoder(w).Encode(transformer.ReceiptTransformer{}.TransformOne(dReceipt))
 	}
 }
 

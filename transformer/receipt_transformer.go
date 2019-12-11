@@ -36,7 +36,7 @@ type ReceiptTransformer struct {
 }
 
 // TransformOne receipt specified JSON
-func (rf ReceiptTransformer) TransformOne(receipt model.Receipt, values map[string]string) ReceiptDataOneTransformer {
+func (rf ReceiptTransformer) TransformOne(receipt model.Receipt) ReceiptDataOneTransformer {
 	var newReceipts []ReceiptTransformer
 	var newData ReceiptDataOneTransformer
 	var newReceipt ReceiptTransformer
