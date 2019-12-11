@@ -89,7 +89,7 @@ func (rh ReceiptHTTPHandler) Store() http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(receipt)
+		json.NewEncoder(w).Encode(transformer.ReceiptTransformer{}.TransformOne(receipt))
 	}
 }
 
@@ -111,7 +111,7 @@ func (rh ReceiptHTTPHandler) Update() http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(receipt)
+		json.NewEncoder(w).Encode(transformer.ReceiptTransformer{}.TransformOne(receipt))
 	}
 }
 
@@ -129,7 +129,7 @@ func (rh ReceiptHTTPHandler) Destroy() http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(receipt)
+		json.NewEncoder(w).Encode(transformer.ReceiptTransformer{}.TransformOne(receipt))
 	}
 }
 
