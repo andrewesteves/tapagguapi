@@ -6,51 +6,83 @@
 
 ### Guard
 /companies/{id} GET
+
 /companies/{id} PUT
+
 /companies/{id} DELETE
+
 /companies POST
+
 /companies GET
+
 /categories/{id} GET
+
 /categories/{id} PUT
+
 /categories/{id} DELETE
+
 /categories POST
+
 /categories GET
+
 /users/logout POST
+
 /users/{id} GET
+
 /users/{id} PUT
+
 /users/{id} DELETE
+
 /users GET
+
 /receipts/query/{field} GET
+
 /receipts/retrieve" GET
+
 /receipts/{id} GET
+
 /receipts/{id} PUT
+
 /receipts/{id} DELETE
+
 /receipts POST
+
 /receipts GET
+
 /receipts/{receiptID}/items/{id} GET
+
 /receipts/{receiptID}/items/{id} PUT
+
 /receipts/{receiptID}/items/{id} DELETE
+
 /receipts/{receiptID}/items POST
+
 /receipts/{receiptID}/items GET
 
 ### Unguard
 /users/login POST
+
 /users/recover POST
+
 /users POST
 
 ## Create an user
 
 ### Request
 Method: POST
+
 Endpoint: /users
+
 Body:
+
 ```json
 {
-	"name": "Andrew Luiz",
-	"email": "andrewluiz@tapaggu.com",
-	"password": "1234567"
+  "name": "Andrew Luiz",
+  "email": "andrewluiz@tapaggu.com",
+  "password": "1234567"
 }
 ```
+
 ### Response
 ```json
 {
@@ -65,8 +97,11 @@ Body:
 
 ### Request
 Method: POST
+
 Endpoint: /receipts/retrieve?url=URL
+
 Authorization: Bearer Token
+
 
 ### Response
 ```json
@@ -150,8 +185,11 @@ Authorization: Bearer Token
 
 ### Request
 Method: POST
+
 Endpoint: /receipts
+
 Authorization: Bearer Token
+
 
 ```json
 {
@@ -204,8 +242,11 @@ Authorization: Bearer Token
 
 ### Request
 Method: POST
+
 Endpoint: /receipts/{receiptID}/items
+
 Authorization: Bearer Token
+
 
 ```json
 {
@@ -236,8 +277,11 @@ Authorization: Bearer Token
 
 ### Request
 Method: POST
+
 Endpoint: /companies
+
 Authorization: Bearer Token
+
 
 ```json
 {
@@ -273,8 +317,11 @@ Authorization: Bearer Token
 
 ### Request
 Method: POST
+
 Endpoint: /categories
+
 Authorization: Bearer Token
+
 
 ```json
 {
@@ -290,4 +337,4 @@ Authorization: Bearer Token
   "title": "Atividade",
   "icon": "bike"
 }
-```json
+```
