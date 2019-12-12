@@ -3,6 +3,7 @@ package transformer
 import (
 	"time"
 
+	"github.com/andrewesteves/tapagguapi/common"
 	"github.com/andrewesteves/tapagguapi/model"
 )
 
@@ -36,7 +37,7 @@ type ReceiptTransformer struct {
 }
 
 // TransformOne receipt specified JSON
-func (rf ReceiptTransformer) TransformOne(receipt model.Receipt, values map[string]string) ReceiptDataOneTransformer {
+func (rf ReceiptTransformer) TransformOne(receipt model.Receipt) ReceiptDataOneTransformer {
 	var newReceipts []ReceiptTransformer
 	var newData ReceiptDataOneTransformer
 	var newReceipt ReceiptTransformer
@@ -48,7 +49,9 @@ func (rf ReceiptTransformer) TransformOne(receipt model.Receipt, values map[stri
 	newReceipt.Discount = receipt.Discount
 	newReceipt.Total = receipt.Total
 	newReceipt.Items = receipt.Items
-	newReceipt.URL = receipt.URL
+	if receipt.URL != "" {
+		newReceipt.URL = common.ParseURL(receipt.URL, "schema", "host", "path") + "?p=" + receipt.AccessKey
+	}
 	newReceipt.AccessKey = receipt.AccessKey
 	newReceipt.IssuedAt = receipt.IssuedAt
 	newReceipt.CreatedAt = receipt.CreatedAt
@@ -78,7 +81,9 @@ func (rf ReceiptTransformer) TransformMany(receipts []model.Receipt, values map[
 		newReceipt.Discount = receipt.Discount
 		newReceipt.Total = receipt.Total
 		newReceipt.Items = receipt.Items
-		newReceipt.URL = receipt.URL
+		if receipt.URL != "" {
+			newReceipt.URL = common.ParseURL(receipt.URL, "schema", "host", "path") + "?p=" + receipt.AccessKey
+		}
 		newReceipt.AccessKey = receipt.AccessKey
 		newReceipt.IssuedAt = receipt.IssuedAt
 		newReceipt.CreatedAt = receipt.CreatedAt

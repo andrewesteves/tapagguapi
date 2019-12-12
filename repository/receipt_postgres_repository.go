@@ -99,8 +99,41 @@ func (r ReceiptPostgresRepository) Find(id int64) (model.Receipt, error) {
 
 // Store a receipt
 func (r ReceiptPostgresRepository) Store(receipt model.Receipt) (model.Receipt, error) {
+	var company model.Company
+	var category model.Category
+	var err error
 	lastInsertID := 0
-	err := r.Conn.QueryRow("INSERT INTO receipts (category_id, company_id, user_id, title, tax, discount, extra, total, url, access_key, issued_at, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,now(),now()) RETURNING id", receipt.Category.ID, receipt.Company.ID, receipt.User.ID, receipt.Title, receipt.Tax, receipt.Discount, receipt.Extra, receipt.Total, receipt.URL, receipt.AccessKey, receipt.IssuedAt).Scan(&lastInsertID)
+
+	receipt.Company.User = receipt.User
+	receipt.Category.User = receipt.User
+
+	companyRepo := NewCompanyPostgresRepository(r.Conn)
+	company, err = companyRepo.FindBy(receipt.Company, "title", receipt.Company.Title)
+	if company.Title == "" {
+		receipt.Company, err = companyRepo.Store(receipt.Company)
+		if err != nil {
+			return model.Receipt{}, err
+		}
+	} else {
+		receipt.Company.ID = company.ID
+	}
+
+	categoryRepo := NewCategoryPostgresRepository(r.Conn)
+	category, err = categoryRepo.FindBy(receipt.Category, "title", receipt.Category.Title)
+	if category.Title == "" {
+		receipt.Category, err = categoryRepo.Store(model.Category{
+			User:  receipt.User,
+			Title: receipt.Category.Title,
+			Icon:  receipt.Category.Icon,
+		})
+		if err != nil {
+			return model.Receipt{}, err
+		}
+	} else {
+		receipt.Category.ID = category.ID
+	}
+
+	err = r.Conn.QueryRow("INSERT INTO receipts (category_id, company_id, user_id, title, tax, discount, extra, total, url, access_key, issued_at, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,now(),now()) RETURNING id", receipt.Category.ID, receipt.Company.ID, receipt.User.ID, receipt.Title, receipt.Tax, receipt.Discount, receipt.Extra, receipt.Total, receipt.URL, receipt.AccessKey, receipt.IssuedAt).Scan(&lastInsertID)
 	if err != nil {
 		return model.Receipt{}, err
 	}

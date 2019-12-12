@@ -9,6 +9,7 @@ import (
 	"github.com/andrewesteves/tapagguapi/middleware"
 	"github.com/andrewesteves/tapagguapi/model"
 	"github.com/andrewesteves/tapagguapi/service"
+	"github.com/andrewesteves/tapagguapi/transformer"
 	"github.com/gorilla/mux"
 )
 
@@ -56,7 +57,7 @@ func (rh CategoryHTTPHandler) Find() http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(category)
+		json.NewEncoder(w).Encode(transformer.CategoryTransformer{}.TransformOne(category))
 	}
 }
 
@@ -73,7 +74,7 @@ func (rh CategoryHTTPHandler) Store() http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(category)
+		json.NewEncoder(w).Encode(transformer.CategoryTransformer{}.TransformOne(category))
 	}
 }
 
@@ -95,7 +96,7 @@ func (rh CategoryHTTPHandler) Update() http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(category)
+		json.NewEncoder(w).Encode(transformer.CategoryTransformer{}.TransformOne(category))
 	}
 }
 
@@ -113,6 +114,6 @@ func (rh CategoryHTTPHandler) Destroy() http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(category)
+		json.NewEncoder(w).Encode(transformer.CategoryTransformer{}.TransformOne(category))
 	}
 }
