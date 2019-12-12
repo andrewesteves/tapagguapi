@@ -325,8 +325,8 @@ Authorization: Bearer Token
 
 ```json
 {
-	"title": "Transporte",
-	"icon": "car"
+  "title": "Transporte",
+  "icon": "car"
 }
 ```
 
