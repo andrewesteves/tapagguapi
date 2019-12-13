@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -22,6 +23,7 @@ func NewUserHTTPHandler(mux *mux.Router, userService service.UserContractService
 	handler := &UserHTTPHandler{
 		Us: userService,
 	}
+	mux.HandleFunc("/users/confirmation", handler.Confirmation()).Methods("GET")
 	mux.HandleFunc("/users/recover", handler.Recover()).Methods("POST")
 	mux.HandleFunc("/users/login", handler.Login()).Methods("POST")
 	mux.HandleFunc("/users/logout", handler.Logout()).Methods("POST")
@@ -193,5 +195,17 @@ func (uh UserHTTPHandler) Recover() http.HandlerFunc {
 			return
 		}
 		w.WriteHeader(http.StatusOK)
+	}
+}
+
+// Confirmation email
+func (uh UserHTTPHandler) Confirmation() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		tpl, err := template.ParseFiles("template/confirmation.html")
+		if err != nil {
+			panic(err.Error())
+		}
+		w.Header().Set("Content-Type", "text/html")
+		tpl.Execute(w, nil)
 	}
 }

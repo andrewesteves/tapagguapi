@@ -59,6 +59,7 @@ func guard(r *http.Request) bool {
 		"/users-POST",
 		"/users/login-POST",
 		"/users/recover-POST",
+		"/users/confirmation-GET",
 	}
 	return !contains(accessable, fmt.Sprintf("%s-%s", r.RequestURI, r.Method))
 }
