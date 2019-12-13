@@ -9,6 +9,8 @@ type User struct {
 	Email     string    `json:"email,omitempty"`
 	Password  string    `json:"-"`
 	Token     string    `json:"token,omitempty"`
+	Active    int64     `json:"active"`
+	Remember  string    `json:"remember"`
 	CreatedAt time.Time `json:"-"`
 	UpdatedAt time.Time `json:"-"`
 }

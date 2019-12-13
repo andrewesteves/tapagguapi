@@ -17,6 +17,9 @@ type EnvConfig struct {
 	Idiom struct {
 		Lang string `yaml:"lang"`
 	}
+	App struct {
+		URL string `yaml:"url"`
+	}
 }
 
 // Vars configuration

@@ -51,6 +51,7 @@ func (u UserService) Store(user model.User) (model.User, error) {
 	}
 	user.Password = string(hash)
 	user.Token = generateToken(user.Password)
+	user.Remember = generateToken(time.Now().UTC().Format(time.RFC850))
 	user, err = u.userRepository.Store(user)
 	if err != nil {
 		return model.User{}, err
@@ -118,6 +119,15 @@ func (u UserService) Logout(user model.User) (model.User, error) {
 	dUser.Token = generateToken(user.Email)
 	dUser, err = u.userRepository.Update(dUser)
 	return user, nil
+}
+
+// FindByArgs args
+func (u UserService) FindByArgs(args map[string]interface{}) (model.User, error) {
+	dUser, err := u.userRepository.FindByArgs(args)
+	if err != nil {
+		return model.User{}, errors.New(config.LangConfig{}.I18n()["confirmation_invalid"])
+	}
+	return dUser, nil
 }
 
 func generateToken(value string) string {

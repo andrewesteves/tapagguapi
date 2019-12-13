@@ -80,7 +80,7 @@ func (uh UserHTTPHandler) Store() http.HandlerFunc {
 			})
 			return
 		}
-		err = service.Mailer{}.Send([]string{user.Email}, "welcome", []string{})
+		err = service.Mailer{}.Send([]string{user.Email}, "welcome", []string{user.Email, user.Remember})
 		if err != nil {
 			log.Println(err.Error())
 			w.WriteHeader(http.StatusServiceUnavailable)
@@ -185,7 +185,7 @@ func (uh UserHTTPHandler) Recover() http.HandlerFunc {
 			})
 			return
 		}
-		err = service.Mailer{}.Send([]string{user.Email}, "recover", []string{dUser.Email, dUser.Token})
+		err = service.Mailer{}.Send([]string{user.Email}, "recover", []string{dUser.Email, dUser.Remember})
 		if err != nil {
 			log.Println(err.Error())
 			w.WriteHeader(http.StatusServiceUnavailable)
@@ -201,11 +201,26 @@ func (uh UserHTTPHandler) Recover() http.HandlerFunc {
 // Confirmation email
 func (uh UserHTTPHandler) Confirmation() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		tpl, err := template.ParseFiles("template/confirmation.html")
-		if err != nil {
-			panic(err.Error())
+		if r.URL.Query().Get("email") != "" && r.URL.Query().Get("token") != "" {
+			user, err := uh.Us.FindByArgs(map[string]interface{}{
+				"email":    r.URL.Query().Get("email"),
+				"remember": r.URL.Query().Get("token"),
+			})
+			if err != nil {
+				w.WriteHeader(http.StatusUnprocessableEntity)
+				json.NewEncoder(w).Encode(map[string]string{
+					"message": err.Error(),
+				})
+				return
+			}
+			user.Active = 1
+			_, err = uh.Us.Update(user)
+			tpl, err := template.ParseFiles("template/confirmation.html")
+			if err != nil {
+				panic(err.Error())
+			}
+			w.Header().Set("Content-Type", "text/html")
+			tpl.Execute(w, nil)
 		}
-		w.Header().Set("Content-Type", "text/html")
-		tpl.Execute(w, nil)
 	}
 }

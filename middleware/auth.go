@@ -3,10 +3,12 @@ package middleware
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
 
+	"github.com/andrewesteves/tapagguapi/config"
 	"github.com/andrewesteves/tapagguapi/model"
 )
 
@@ -43,9 +45,19 @@ func (a AuthMiddleware) Enable(next http.Handler) http.Handler {
 			if len(headerAuth) > 1 {
 				token = headerAuth[1]
 			}
-			err := a.Conn.QueryRow("SELECT id, name, email, token FROM users WHERE token = $1", strings.TrimSpace(token)).Scan(&user.ID, &user.Name, &user.Email, &user.Token)
+			err := a.Conn.QueryRow("SELECT id, name, email, token, active FROM users WHERE token = $1", strings.TrimSpace(token)).Scan(&user.ID, &user.Name, &user.Email, &user.Token, &user.Active)
 			if err != nil {
-				http.Error(w, "Please provide the autorization token", http.StatusUnauthorized)
+				w.WriteHeader(http.StatusUnauthorized)
+				json.NewEncoder(w).Encode(map[string]string{
+					"message": config.LangConfig{}.I18n()["token_required"],
+				})
+				return
+			}
+			if user.Active == 0 {
+				w.WriteHeader(http.StatusUnauthorized)
+				json.NewEncoder(w).Encode(map[string]string{
+					"message": config.LangConfig{}.I18n()["user_inactive"],
+				})
 				return
 			}
 			r = r.WithContext(WithUser(r.Context(), &user))
@@ -61,7 +73,7 @@ func guard(r *http.Request) bool {
 		"/users/recover-POST",
 		"/users/confirmation-GET",
 	}
-	return !contains(accessable, fmt.Sprintf("%s-%s", r.RequestURI, r.Method))
+	return !contains(accessable, fmt.Sprintf("%s-%s", r.URL.Path, r.Method))
 }
 
 func contains(arr []string, str string) bool {

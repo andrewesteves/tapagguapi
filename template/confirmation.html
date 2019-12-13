@@ -12,20 +12,49 @@
       background-color: #e9ecef;
     }
 
-    .box {
-      width: 650px;
-      height: 150px;
-      line-height: 150px;
-      margin: 0 auto;
-      text-align: center;
-      background-color: #fff;
+    @media (min-width: 651px) {
+      .box {
+        margin: 10px;
+        width: 650px;
+        height: 150px;
+        line-height: 150px;
+        margin: 0 auto;
+        text-align: center;
+        background-color: #fff;
+      }
+
+      .box h1 {
+        font-size: 30px;
+      }
+
+      .info {
+        width: 650px;
+        height: 150px;
+        margin: 0 auto;
+        text-align: center;
+      }
     }
 
-    .info {
-      width: 650px;
-      height: 150px;
-      margin: 0 auto;
-      text-align: center;
+    @media (max-width: 650px) {
+      .box {
+        width: 350px;
+        height: 100px;
+        line-height: 100px;
+        margin: 0 auto;
+        text-align: center;
+        background-color: #fff;
+      }
+
+      .box h1 {
+        font-size: 18px;
+      }
+
+      .info {
+        width: 350px;
+        height: 100px;
+        margin: 0 auto;
+        text-align: center;
+      }
     }
   </style>
   <title>Confirmação de e-mail</title>
