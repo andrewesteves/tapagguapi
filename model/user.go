@@ -7,7 +7,7 @@ type User struct {
 	ID        int64     `json:"id,omitempty"`
 	Name      string    `json:"name,omitempty"`
 	Email     string    `json:"email,omitempty"`
-	Password  string    `json:"-"`
+	Password  string    `json:"password"`
 	Token     string    `json:"token,omitempty"`
 	Active    int64     `json:"active"`
 	Remember  string    `json:"remember"`
