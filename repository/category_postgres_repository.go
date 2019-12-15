@@ -101,3 +101,49 @@ func (r CategoryPostgresRepository) FindBy(category model.Category, field string
 	}
 	return category, nil
 }
+
+// GroupTotal categories grouped to get the total
+func (r CategoryPostgresRepository) GroupTotal(user model.User, values map[string]string) ([]model.Category, error) {
+	var categories []model.Category
+	var rs *sql.Rows
+	var err error
+	args := []interface{}{user.ID}
+	i := 2
+	query := "SELECT c.id, c.title, c.icon, SUM(r.total) AS ctotal FROM categories AS c "
+	query += "INNER JOIN receipts AS r "
+	query += "ON c.id = r.category_id "
+	query += "WHERE r.user_id = $1 "
+
+	if len(values) == 0 {
+		query += "AND (EXTRACT (MONTH FROM r.issued_at) = EXTRACT (MONTH FROM CURRENT_DATE)) AND (EXTRACT (YEAR FROM r.issued_at) = EXTRACT (YEAR FROM CURRENT_DATE)) "
+	} else {
+		if mt, ok := values["month"]; ok {
+			args = append(args, mt)
+			query += fmt.Sprintf("AND (EXTRACT (MONTH FROM r.issued_at) = $%d) ", i)
+			i++
+		}
+		if yr, ok := values["year"]; ok {
+			args = append(args, yr)
+			query += fmt.Sprintf("AND (EXTRACT (YEAR FROM r.issued_at) = $%d) ", i)
+		}
+	}
+
+	query += "GROUP BY c.id, c.title, c.icon "
+	query += "ORDER BY ctotal DESC"
+
+	rs, err = r.Conn.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	for rs.Next() {
+		var c model.Category
+		err = rs.Scan(&c.ID, &c.Title, &c.Icon, &c.Total)
+		if err != nil {
+			return nil, err
+		}
+		categories = append(categories, c)
+	}
+
+	return categories, nil
+}

@@ -12,4 +12,5 @@ type UserContractService interface {
 	Login(u model.User) (model.User, error)
 	Logout(u model.User) (model.User, error)
 	FindBy(field string, value interface{}) (model.User, error)
+	FindByArgs(args map[string]interface{}) (model.User, error)
 }

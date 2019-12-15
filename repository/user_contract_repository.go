@@ -10,4 +10,5 @@ type UserContractRepository interface {
 	Update(u model.User) (model.User, error)
 	Destroy(int int64) (model.User, error)
 	FindBy(field string, value interface{}) (model.User, error)
+	FindByArgs(args map[string]interface{}) (model.User, error)
 }

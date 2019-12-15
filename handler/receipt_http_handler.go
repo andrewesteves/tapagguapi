@@ -52,9 +52,12 @@ func (rh ReceiptHTTPHandler) All() http.HandlerFunc {
 		if err != nil {
 			panic(err.Error())
 		}
-
+		categories, err := rh.Rs.GroupCategoryTotal(*middleware.GetUser(r.Context()), values)
+		if err != nil {
+			panic(err.Error())
+		}
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(transformer.ReceiptTransformer{}.TransformMany(receipts, nil))
+		json.NewEncoder(w).Encode(transformer.ReceiptTransformer{}.TransformMany(receipts, categories, nil))
 	}
 }
 
@@ -172,6 +175,6 @@ func (rh ReceiptHTTPHandler) Query() http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(transformer.ReceiptTransformer{}.TransformMany(receipts, nil))
+		json.NewEncoder(w).Encode(transformer.ReceiptTransformer{}.TransformMany(receipts, nil, nil))
 	}
 }

@@ -313,3 +313,8 @@ func (r ReceiptPostgresRepository) Count(user model.User) (int, error) {
 	}
 	return count, nil
 }
+
+// GroupCategoryTotal receipts total by category
+func (r ReceiptPostgresRepository) GroupCategoryTotal(user model.User, values map[string]string) ([]model.Category, error) {
+	return NewCategoryPostgresRepository(r.Conn).GroupTotal(user, values)
+}

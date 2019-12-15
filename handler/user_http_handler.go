@@ -2,11 +2,13 @@ package handler
 
 import (
 	"encoding/json"
+	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
 
+	"github.com/andrewesteves/tapagguapi/config"
 	"github.com/andrewesteves/tapagguapi/model"
 	"github.com/andrewesteves/tapagguapi/service"
 	"github.com/gorilla/mux"
@@ -22,6 +24,10 @@ func NewUserHTTPHandler(mux *mux.Router, userService service.UserContractService
 	handler := &UserHTTPHandler{
 		Us: userService,
 	}
+	mux.HandleFunc("/users/reset_confirmation", handler.ResetConfirmation()).Methods("GET")
+	mux.HandleFunc("/users/reset", handler.Reset()).Methods("POST")
+	mux.HandleFunc("/users/new_password", handler.NewPassword()).Methods("GET")
+	mux.HandleFunc("/users/confirmation", handler.Confirmation()).Methods("GET")
 	mux.HandleFunc("/users/recover", handler.Recover()).Methods("POST")
 	mux.HandleFunc("/users/login", handler.Login()).Methods("POST")
 	mux.HandleFunc("/users/logout", handler.Logout()).Methods("POST")
@@ -78,7 +84,7 @@ func (uh UserHTTPHandler) Store() http.HandlerFunc {
 			})
 			return
 		}
-		err = service.Mailer{}.Send([]string{user.Email}, "welcome", []string{})
+		err = service.Mailer{}.Send([]string{user.Email}, "welcome", []string{user.Email, user.Remember})
 		if err != nil {
 			log.Println(err.Error())
 			w.WriteHeader(http.StatusServiceUnavailable)
@@ -183,7 +189,7 @@ func (uh UserHTTPHandler) Recover() http.HandlerFunc {
 			})
 			return
 		}
-		err = service.Mailer{}.Send([]string{user.Email}, "recover", []string{dUser.Email, dUser.Token})
+		err = service.Mailer{}.Send([]string{user.Email}, "recover", []string{dUser.Email, dUser.Remember})
 		if err != nil {
 			log.Println(err.Error())
 			w.WriteHeader(http.StatusServiceUnavailable)
@@ -193,5 +199,91 @@ func (uh UserHTTPHandler) Recover() http.HandlerFunc {
 			return
 		}
 		w.WriteHeader(http.StatusOK)
+	}
+}
+
+// Confirmation email
+func (uh UserHTTPHandler) Confirmation() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Query().Get("email") != "" && r.URL.Query().Get("token") != "" {
+			user, err := uh.Us.FindByArgs(map[string]interface{}{
+				"email":    r.URL.Query().Get("email"),
+				"remember": r.URL.Query().Get("token"),
+			})
+			if err != nil {
+				w.WriteHeader(http.StatusUnprocessableEntity)
+				json.NewEncoder(w).Encode(map[string]string{
+					"message": err.Error(),
+				})
+				return
+			}
+			user.Active = 1
+			_, err = uh.Us.Update(user)
+			var tpl *template.Template
+			tpl, err = template.ParseFiles("template/layout.html", "template/confirmation.html")
+			if err != nil {
+				panic(err.Error())
+			}
+			w.Header().Set("Content-Type", "text/html")
+			tpl.ExecuteTemplate(w, "layout", nil)
+		}
+	}
+}
+
+// NewPassword email
+func (uh UserHTTPHandler) NewPassword() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Query().Get("email") != "" && r.URL.Query().Get("token") != "" {
+			var tpl *template.Template
+			tpl, err := template.ParseFiles("template/layout.html", "template/new_password.html")
+			if err != nil {
+				panic(err.Error())
+			}
+			w.Header().Set("Content-Type", "text/html")
+			tpl.ExecuteTemplate(w, "layout", struct {
+				Email  string
+				Token  string
+				Action string
+			}{
+				r.URL.Query().Get("email"),
+				r.URL.Query().Get("token"),
+				config.EnvConfig{}.App.URL + "/users/reset",
+			})
+		}
+	}
+}
+
+// Reset password
+func (uh UserHTTPHandler) Reset() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.FormValue("email") != "" && r.FormValue("token") != "" {
+			user, err := uh.Us.FindByArgs(map[string]interface{}{
+				"email":    r.FormValue("email"),
+				"remember": r.FormValue("token"),
+			})
+			if err != nil {
+				w.WriteHeader(http.StatusUnprocessableEntity)
+				json.NewEncoder(w).Encode(map[string]string{
+					"message": err.Error(),
+				})
+				return
+			}
+			user.Password = r.FormValue("password")
+			_, err = uh.Us.Update(user)
+			http.Redirect(w, r, config.EnvConfig{}.App.URL+"/users/reset_confirmation", http.StatusSeeOther)
+		}
+	}
+}
+
+// ResetConfirmation password
+func (uh UserHTTPHandler) ResetConfirmation() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var tpl *template.Template
+		tpl, err := template.ParseFiles("template/layout.html", "template/reset_confirmation.html")
+		if err != nil {
+			panic(err.Error())
+		}
+		w.Header().Set("Content-Type", "text/html")
+		tpl.ExecuteTemplate(w, "layout", nil)
 	}
 }

@@ -9,7 +9,8 @@ import (
 
 // ReceiptDataManyTransformer struct
 type ReceiptDataManyTransformer struct {
-	Receipts []ReceiptTransformer `json:"receipts"`
+	Receipts   []ReceiptTransformer  `json:"receipts"`
+	Categories []CategoryTransformer `json:"categories"`
 	CommonTransformer
 }
 
@@ -68,8 +69,9 @@ func (rf ReceiptTransformer) TransformOne(receipt model.Receipt) ReceiptDataOneT
 }
 
 // TransformMany receipt specified JSON
-func (rf ReceiptTransformer) TransformMany(receipts []model.Receipt, values map[string]string) ReceiptDataManyTransformer {
+func (rf ReceiptTransformer) TransformMany(receipts []model.Receipt, categories []model.Category, values map[string]string) ReceiptDataManyTransformer {
 	var newReceipts []ReceiptTransformer
+	var newCategories []CategoryTransformer
 	var newData ReceiptDataManyTransformer
 	for _, receipt := range receipts {
 		var newReceipt ReceiptTransformer
@@ -112,6 +114,19 @@ func (rf ReceiptTransformer) TransformMany(receipts []model.Receipt, values map[
 	}
 	if total, ok := values["total"]; ok {
 		newData.Total = total
+	}
+	if len(categories) > 0 {
+		for _, cat := range categories {
+			var c CategoryTransformer
+			c.ID = cat.ID
+			c.Title = cat.Title
+			c.Icon = cat.Icon
+			c.Total = cat.Total
+			newCategories = append(newCategories, c)
+		}
+		newData.Categories = newCategories
+	} else {
+		newData.Categories = make([]CategoryTransformer, 0)
 	}
 	return newData
 }

@@ -26,9 +26,10 @@ func (m Mailer) Send(to []string, template string, data []string) error {
 	}
 
 	setHeader(&body, to, env.Mail.From)
+	data = append(data, env.App.URL)
 	if template == "welcome" {
-		body += "Subject: Boa vindas!\r\n"
-		msg = setBodyWelcome()
+		body += "Subject: Boas vindas!\r\n"
+		msg = setBodyWelcome(data)
 	} else if template == "recover" {
 		body += "Subject: Recuperação de senha\r\n"
 		msg = setBodyRecover(data)
@@ -64,17 +65,19 @@ func setHeader(body *string, to []string, from string) {
 	}
 }
 
-func setBodyWelcome() string {
+func setBodyWelcome(data []string) string {
+	link := fmt.Sprintf("%s/users/confirmation?email=%s&token=%s", data[2], data[0], data[1])
 	body := "Seja bem vindo!<br><br>"
 	body += "Precisamos confirmar o seu e-mail, por favor, acesse o link abaixo.<br><br>"
-	body += "[...]<br><br>"
+	body += fmt.Sprintf("<a href='%s'>%s</a><br><br>", link, link)
 	return body
 }
 
 func setBodyRecover(data []string) string {
+	link := fmt.Sprintf("%s/users/reset?email=%s&token=%s", data[2], data[0], data[1])
 	body := "Olá, tudo bem?<br><br>"
 	body += "Recebemos sua solicitação de recuperação de senha.<br>"
-	body += fmt.Sprintf("Acesse o link https://tapaggu.com/reset?email=%s&token=%s e atualize.<br><br>", data[0], data[1])
+	body += fmt.Sprintf("Acesse o link <a href='%s'>%s</a> e atualize.<br><br>", link, link)
 	return body
 }
 

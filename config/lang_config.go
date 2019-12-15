@@ -25,6 +25,9 @@ func (l LangConfig) EnUs() map[string]string {
 	lang["email_invalid"] = "We can't find a user with that e-mail address"
 	lang["auth_failed"] = "These credentials do not match our records"
 	lang["auth_reset"] = "We have e-mailed your password reset link!"
+	lang["token_required"] = "Please provide the authorization token"
+	lang["user_inactive"] = "Please confirm your email"
+	lang["confirmation_invalid"] = "Invalid user verification link"
 	return lang
 }
 
@@ -38,5 +41,8 @@ func (l LangConfig) PtBr() map[string]string {
 	lang["email_invalid"] = "Não conseguimos encontrar um usuário com esse endereço de e-mail"
 	lang["auth_failed"] = "Essas credenciais não correspondem aos nossos registros"
 	lang["auth_reset"] = "Enviamos seu link de redefinição de senha por e-mail!"
+	lang["token_required"] = "Forneça o token de autorização"
+	lang["user_inactive"] = "Por favor, confirme o seu e-mail"
+	lang["confirmation_invalid"] = "Link inválido para confirmação de usuário"
 	return lang
 }
