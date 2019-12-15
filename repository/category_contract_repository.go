@@ -10,4 +10,5 @@ type CategoryContractRepository interface {
 	Update(c model.Category) (model.Category, error)
 	Destroy(int int64) (model.Category, error)
 	FindBy(c model.Category, field string, value interface{}) (model.Category, error)
+	GroupTotal(user model.User, values map[string]string) ([]model.Category, error)
 }

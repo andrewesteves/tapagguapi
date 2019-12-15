@@ -77,3 +77,12 @@ func (r ReceiptService) RetrieveStore(receipt model.Receipt) (model.Receipt, err
 	}
 	return receipt, nil
 }
+
+// GroupCategoryTotal receipts total by category service
+func (r ReceiptService) GroupCategoryTotal(user model.User, values map[string]string) ([]model.Category, error) {
+	categories, err := r.receiptRepository.GroupCategoryTotal(user, values)
+	if err != nil {
+		return nil, err
+	}
+	return categories, nil
+}

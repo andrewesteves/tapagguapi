@@ -12,4 +12,5 @@ type ReceiptContractRepository interface {
 	FindManyBy(field string, value interface{}) ([]model.Receipt, error)
 	RetrieveStore(r model.Receipt) (model.Receipt, error)
 	Count(user model.User) (int, error)
+	GroupCategoryTotal(user model.User, values map[string]string) ([]model.Category, error)
 }
