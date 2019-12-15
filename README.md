@@ -277,6 +277,7 @@ Authorization: Bearer Token
 Method: GET
 
 Endpoint: /receipts
+
 Params: month|year|category
 
 Authorization: Bearer Token
