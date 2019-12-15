@@ -102,7 +102,6 @@ Endpoint: /receipts/retrieve?url=URL
 
 Authorization: Bearer Token
 
-
 ### Response
 ```json
 {
@@ -179,7 +178,6 @@ Authorization: Bearer Token
   }
 }
 ```
-
 
 ## New receipt
 
@@ -270,6 +268,123 @@ Authorization: Bearer Token
   "measure": "UN",
   "created_at": "0001-01-01T00:00:00Z",
   "updated_at": "0001-01-01T00:00:00Z"
+}
+```
+
+## All receipts
+
+### Request
+Method: GET
+
+Endpoint: /receipts
+Params: month|year|category
+
+Authorization: Bearer Token
+
+### Response
+```json
+{
+  "receipts": [
+    {
+      "id": 4,
+      "category": {
+        "id": 3,
+        "title": "Transporte",
+        "icon": "car",
+        "total": 0
+      },
+      "company": {
+        "id": 2,
+        "cnpj": "",
+        "name": "",
+        "title": "Posto BR",
+        "address": "  "
+      },
+      "title": "Viagem para arcoverde",
+      "tax": 0,
+      "extra": 0,
+      "discount": 0,
+      "total": 200,
+      "items": [],
+      "url": "",
+      "accessKey": "",
+      "issuedAt": "2019-12-12T20:38:08.699341Z",
+      "createdAt": "2019-12-15T12:40:01.929391Z",
+      "updatedAt": "2019-12-15T12:40:01.929391Z"
+    },
+    {
+      "id": 2,
+      "category": {
+        "id": 2,
+        "title": "Alimentação",
+        "icon": "food",
+        "total": 0
+      },
+      "company": {
+        "id": 2,
+        "cnpj": "",
+        "name": "",
+        "title": "Mc Donalds",
+        "address": "  "
+      },
+      "title": "Viagem para arcoverde",
+      "tax": 0,
+      "extra": 0,
+      "discount": 0,
+      "total": 100,
+      "items": [],
+      "url": "",
+      "accessKey": "",
+      "issuedAt": "2019-12-11T20:38:08.699341Z",
+      "createdAt": "2019-12-15T02:30:28.186413Z",
+      "updatedAt": "2019-12-15T02:30:28.186413Z"
+    },
+    {
+      "id": 1,
+      "category": {
+        "id": 2,
+        "title": "Alimentação",
+        "icon": "food",
+        "total": 0
+      },
+      "company": {
+        "id": 1,
+        "cnpj": "",
+        "name": "",
+        "title": "Posto BR",
+        "address": "  "
+      },
+      "title": "Viagem para arcoverde",
+      "tax": 0,
+      "extra": 0,
+      "discount": 0,
+      "total": 200,
+      "items": [],
+      "url": "",
+      "accessKey": "",
+      "issuedAt": "2019-12-11T20:38:08.699341Z",
+      "createdAt": "2019-12-15T02:29:57.86471Z",
+      "updatedAt": "2019-12-15T02:29:57.86471Z"
+    }
+  ],
+  "categories": [
+    {
+      "id": 2,
+      "title": "Alimentação",
+      "icon": "food",
+      "total": 300
+    },
+    {
+      "id": 3,
+      "title": "Transporte",
+      "icon": "car",
+      "total": 200
+    }
+  ],
+  "current": "",
+  "prev": "",
+  "next": "",
+  "total": ""
 }
 ```
 
