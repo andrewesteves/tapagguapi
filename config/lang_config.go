@@ -28,6 +28,7 @@ func (l LangConfig) EnUs() map[string]string {
 	lang["token_required"] = "Please provide the authorization token"
 	lang["user_inactive"] = "Please confirm your email"
 	lang["confirmation_invalid"] = "Invalid user verification link"
+	lang["email_send"] = "E-mail successfully sent"
 	return lang
 }
 
@@ -44,5 +45,6 @@ func (l LangConfig) PtBr() map[string]string {
 	lang["token_required"] = "Forneça o token de autorização"
 	lang["user_inactive"] = "Por favor, confirme o seu e-mail"
 	lang["confirmation_invalid"] = "Link inválido para confirmação de usuário"
+	lang["email_send"] = "E-mail enviado com sucesso"
 	return lang
 }

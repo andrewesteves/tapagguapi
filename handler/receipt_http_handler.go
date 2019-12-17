@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"sync"
 
 	"github.com/andrewesteves/tapagguapi/common"
 	"github.com/andrewesteves/tapagguapi/middleware"
@@ -38,6 +39,10 @@ func NewReceiptHTTPHandler(mux *mux.Router, receiptService service.ReceiptContra
 // All handler of a receipts
 func (rh ReceiptHTTPHandler) All() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var wg sync.WaitGroup
+		var receipts []model.Receipt
+		var categories []model.Category
+		var err error
 		values := make(map[string]string)
 		if r.URL.Query().Get("month") != "" {
 			values["month"] = r.URL.Query().Get("month")
@@ -48,14 +53,22 @@ func (rh ReceiptHTTPHandler) All() http.HandlerFunc {
 		if r.URL.Query().Get("category") != "" {
 			values["category"] = r.URL.Query().Get("category")
 		}
-		receipts, err := rh.Rs.All(*middleware.GetUser(r.Context()), values)
-		if err != nil {
-			panic(err.Error())
-		}
-		categories, err := rh.Rs.GroupCategoryTotal(*middleware.GetUser(r.Context()), values)
-		if err != nil {
-			panic(err.Error())
-		}
+		wg.Add(2)
+		go func() {
+			receipts, err = rh.Rs.All(*middleware.GetUser(r.Context()), values)
+			if err != nil {
+				panic(err.Error())
+			}
+			wg.Done()
+		}()
+		go func() {
+			categories, err = rh.Rs.GroupCategoryTotal(*middleware.GetUser(r.Context()), values)
+			if err != nil {
+				panic(err.Error())
+			}
+			wg.Done()
+		}()
+		wg.Wait()
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(transformer.ReceiptTransformer{}.TransformMany(receipts, categories, nil))
 	}

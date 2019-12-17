@@ -93,6 +93,28 @@ Body:
 }
 ```
 
+## Resend confirmation link to user
+
+### Request
+Method: POST
+
+Endpoint: /users/resend
+
+Body:
+
+```json
+{
+  "email": "andrewluiz@tapaggu.com"
+}
+```
+
+### Response
+```json
+{
+  "message": "E-mail enviado com sucesso"
+}
+```
+
 ## Retrieve and store a receipt
 
 ### Request
