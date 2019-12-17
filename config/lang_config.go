@@ -29,6 +29,7 @@ func (l LangConfig) EnUs() map[string]string {
 	lang["user_inactive"] = "Please confirm your email"
 	lang["confirmation_invalid"] = "Invalid user verification link"
 	lang["email_send"] = "E-mail successfully sent"
+	lang["welcome"] = "Registered, next step is to confirm your email"
 	return lang
 }
 
@@ -46,5 +47,6 @@ func (l LangConfig) PtBr() map[string]string {
 	lang["user_inactive"] = "Por favor, confirme o seu e-mail"
 	lang["confirmation_invalid"] = "Link inválido para confirmação de usuário"
 	lang["email_send"] = "E-mail enviado com sucesso"
+	lang["welcome"] = "Cadastro realizado, próximo passo é confirmar seu e-mail"
 	return lang
 }

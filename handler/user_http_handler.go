@@ -94,8 +94,10 @@ func (uh UserHTTPHandler) Store() http.HandlerFunc {
 			})
 			return
 		}
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(user)
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]string{
+			"message": config.LangConfig{}.I18n()["welcome"],
+		})
 	}
 }
 
@@ -111,7 +113,7 @@ func (uh UserHTTPHandler) Update() http.HandlerFunc {
 		reqBody, _ := ioutil.ReadAll(r.Body)
 		json.Unmarshal(reqBody, &user)
 		user.ID = int64(id)
-		user, err = uh.Us.Update(user)
+		user, err = uh.Us.Update(user, user.Password != "")
 		if err != nil {
 			panic(err.Error())
 		}
@@ -226,7 +228,7 @@ func (uh UserHTTPHandler) Confirmation() http.HandlerFunc {
 				return
 			}
 			user.Active = 1
-			_, err = uh.Us.Update(user)
+			_, err = uh.Us.Update(user, false)
 			var tpl *template.Template
 			tpl, err = template.ParseFiles("template/layout.html", "template/confirmation.html")
 			if err != nil {
@@ -277,7 +279,7 @@ func (uh UserHTTPHandler) Reset() http.HandlerFunc {
 				return
 			}
 			user.Password = r.FormValue("password")
-			_, err = uh.Us.Update(user)
+			_, err = uh.Us.Update(user, true)
 			http.Redirect(w, r, config.EnvConfig{}.App.URL+"/users/reset_confirmation", http.StatusSeeOther)
 		}
 	}

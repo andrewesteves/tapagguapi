@@ -60,14 +60,16 @@ func (u UserService) Store(user model.User) (model.User, error) {
 }
 
 // Update user service
-func (u UserService) Update(user model.User) (model.User, error) {
-	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	if err != nil {
-		panic(err.Error())
+func (u UserService) Update(user model.User, newPassword bool) (model.User, error) {
+	if newPassword {
+		hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+		if err != nil {
+			panic(err.Error())
+		}
+		user.Password = string(hash)
+		user.Token = generateToken(user.Password)
 	}
-	user.Password = string(hash)
-	user.Token = generateToken(user.Password)
-	user, err = u.userRepository.Update(user)
+	user, err := u.userRepository.Update(user)
 	if err != nil {
 		return model.User{}, err
 	}
