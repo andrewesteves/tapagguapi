@@ -24,6 +24,7 @@ func NewUserHTTPHandler(mux *mux.Router, userService service.UserContractService
 	handler := &UserHTTPHandler{
 		Us: userService,
 	}
+	mux.HandleFunc("/users/resend", handler.Resend()).Methods("POST")
 	mux.HandleFunc("/users/reset_confirmation", handler.ResetConfirmation()).Methods("GET")
 	mux.HandleFunc("/users/reset", handler.Reset()).Methods("POST")
 	mux.HandleFunc("/users/new_password", handler.NewPassword()).Methods("GET")
@@ -150,10 +151,17 @@ func (uh UserHTTPHandler) Login() http.HandlerFunc {
 			json.NewEncoder(w).Encode(map[string]string{
 				"message": err.Error(),
 			})
-		} else {
-			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(u)
+			return
 		}
+		if u.Active == 0 {
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(map[string]string{
+				"message": config.LangConfig{}.I18n()["user_inactive"],
+			})
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(u)
 	}
 }
 
@@ -285,5 +293,37 @@ func (uh UserHTTPHandler) ResetConfirmation() http.HandlerFunc {
 		}
 		w.Header().Set("Content-Type", "text/html")
 		tpl.ExecuteTemplate(w, "layout", nil)
+	}
+}
+
+// Resend welcome email
+func (uh UserHTTPHandler) Resend() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var user model.User
+		reqBody, _ := ioutil.ReadAll(r.Body)
+		json.Unmarshal(reqBody, &user)
+		user, err := uh.Us.FindBy("email", user.Email)
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(map[string]string{
+				"message": config.LangConfig{}.I18n()["email_invalid"],
+			})
+			return
+		}
+		if user.Active == 0 {
+			err = service.Mailer{}.Send([]string{user.Email}, "welcome", []string{user.Email, user.Remember})
+			if err != nil {
+				log.Println(err.Error())
+				w.WriteHeader(http.StatusServiceUnavailable)
+				json.NewEncoder(w).Encode(map[string]string{
+					"message": err.Error(),
+				})
+				return
+			}
+		}
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]string{
+			"message": config.LangConfig{}.I18n()["email_send"],
+		})
 	}
 }
