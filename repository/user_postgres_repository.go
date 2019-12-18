@@ -43,7 +43,7 @@ func (r UserPostgresRepository) All() ([]model.User, error) {
 // Find user
 func (r UserPostgresRepository) Find(id int64) (model.User, error) {
 	var user model.User
-	err := r.Conn.QueryRow("SELECT id, name, email, token, active, remember, created_at, updated_at FROM users WHERE id = $1", id).Scan(&user.ID, &user.Name, &user.Email, &user.Token, &user.Active, &user.Remember, &user.CreatedAt, &user.UpdatedAt)
+	err := r.Conn.QueryRow("SELECT id, name, email, password, token, active, remember, created_at, updated_at FROM users WHERE id = $1", id).Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Token, &user.Active, &user.Remember, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		return model.User{}, err
 	}

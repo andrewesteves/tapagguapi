@@ -74,7 +74,7 @@ func setBodyWelcome(data []string) string {
 }
 
 func setBodyRecover(data []string) string {
-	link := fmt.Sprintf("%s/users/reset?email=%s&token=%s", data[2], data[0], data[1])
+	link := fmt.Sprintf("%s/users/new_password?email=%s&token=%s", data[2], data[0], data[1])
 	body := "Olá, tudo bem?<br><br>"
 	body += "Recebemos sua solicitação de recuperação de senha.<br>"
 	body += fmt.Sprintf("Acesse o link <a href='%s'>%s</a> e atualize.<br><br>", link, link)
