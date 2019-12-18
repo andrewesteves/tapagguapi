@@ -11,6 +11,7 @@ import (
 	"github.com/andrewesteves/tapagguapi/config"
 	"github.com/andrewesteves/tapagguapi/model"
 	"github.com/andrewesteves/tapagguapi/service"
+	"github.com/andrewesteves/tapagguapi/transformer"
 	"github.com/gorilla/mux"
 )
 
@@ -113,13 +114,17 @@ func (uh UserHTTPHandler) Update() http.HandlerFunc {
 		reqBody, _ := ioutil.ReadAll(r.Body)
 		json.Unmarshal(reqBody, &user)
 		user.ID = int64(id)
-		user, err = uh.Us.Update(user, user.Password != "")
+		user, err = uh.Us.Update(user, user.RenewPassword != "")
 		if err != nil {
-			panic(err.Error())
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(map[string]string{
+				"message": err.Error(),
+			})
+			return
 		}
 
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(user)
+		json.NewEncoder(w).Encode(transformer.UserTransformer{}.TransformOne(user))
 	}
 }
 
@@ -137,7 +142,7 @@ func (uh UserHTTPHandler) Destroy() http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(user)
+		json.NewEncoder(w).Encode(transformer.UserTransformer{}.TransformOne(user))
 	}
 }
 
@@ -163,7 +168,7 @@ func (uh UserHTTPHandler) Login() http.HandlerFunc {
 			return
 		}
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(u)
+		json.NewEncoder(w).Encode(transformer.UserTransformer{}.TransformOne(u))
 	}
 }
 
@@ -279,7 +284,8 @@ func (uh UserHTTPHandler) Reset() http.HandlerFunc {
 				return
 			}
 			user.Password = r.FormValue("password")
-			_, err = uh.Us.Update(user, true)
+			user.Remember = r.FormValue("token")
+			_, err = uh.Us.UpdateRecover(user)
 			http.Redirect(w, r, config.EnvConfig{}.App.URL+"/users/reset_confirmation", http.StatusSeeOther)
 		}
 	}
