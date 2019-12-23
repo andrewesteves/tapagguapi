@@ -197,6 +197,8 @@ func (r ReceiptPostgresRepository) Destroy(id int64) (model.Receipt, error) {
 	if rcpt.ID < 1 {
 		return model.Receipt{}, errors.New("Cant't find this receipt id")
 	}
+	rsI, _ := r.Conn.Prepare("DELETE FROM items WHERE receipt_id = $1")
+	rsI.Exec(id)
 	rs, err := r.Conn.Prepare("DELETE FROM receipts WHERE id = $1")
 	if err != nil {
 		return model.Receipt{}, err
