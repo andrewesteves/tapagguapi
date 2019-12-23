@@ -257,7 +257,7 @@ func (r ReceiptPostgresRepository) RetrieveStore(receipt model.Receipt) (model.R
 		receipt.Category, err = categoryRepo.Store(model.Category{
 			User:  receipt.User,
 			Title: "Geral",
-			Icon:  "all",
+			Icon:  "attach_money",
 		})
 		if err != nil {
 			return model.Receipt{}, err
