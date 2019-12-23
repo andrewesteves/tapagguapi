@@ -30,6 +30,9 @@ func (l LangConfig) EnUs() map[string]string {
 	lang["confirmation_invalid"] = "Invalid user verification link"
 	lang["email_send"] = "E-mail successfully sent"
 	lang["welcome"] = "Registered, next step is to confirm your email"
+	lang["store_failed"] = "Could not store information, please try again"
+	lang["process_failed"] = "Could not process the information, please try again"
+	lang["receipt_notfound"] = "Could not find the receipt, please try again"
 	return lang
 }
 
@@ -48,5 +51,8 @@ func (l LangConfig) PtBr() map[string]string {
 	lang["confirmation_invalid"] = "Link inválido para confirmação de usuário"
 	lang["email_send"] = "E-mail enviado com sucesso"
 	lang["welcome"] = "Cadastro realizado, próximo passo é confirmar seu e-mail"
+	lang["store_failed"] = "Não foi possível armazenar a informação, tente novamente"
+	lang["process_failed"] = "Não foi possível processar a informação, tente novamente"
+	lang["receipt_notfound"] = "Não foi possível encontrar a nota, tente novamente"
 	return lang
 }

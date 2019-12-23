@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/andrewesteves/tapagguapi/common"
+	"github.com/andrewesteves/tapagguapi/config"
 	"github.com/andrewesteves/tapagguapi/middleware"
 	"github.com/andrewesteves/tapagguapi/model"
 	"github.com/andrewesteves/tapagguapi/service"
@@ -156,14 +157,17 @@ func (rh ReceiptHTTPHandler) Retrieve() http.HandlerFunc {
 		data, err := common.GetURL(r.URL.Query().Get("url"))
 		if err != nil {
 			log.Printf("Failed to get XML: %v", err)
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			json.NewEncoder(w).Encode(map[string]string{
+				"message": config.LangConfig{}.I18n()["process_failed"],
+			})
 			return
 		}
 		xml.Unmarshal(data, &receipt)
-		if receipt.Total < 0.1 {
-
+		if receipt.Total <= 0 {
 			w.WriteHeader(http.StatusUnprocessableEntity)
 			json.NewEncoder(w).Encode(map[string]string{
-				"message": "The receipt was not found",
+				"message": config.LangConfig{}.I18n()["receipt_notfound"],
 			})
 			return
 		}
@@ -171,6 +175,11 @@ func (rh ReceiptHTTPHandler) Retrieve() http.HandlerFunc {
 		rpt, err := rh.Rs.RetrieveStore(receipt)
 		if err != nil {
 			log.Printf("Failed to store: %v", err)
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			json.NewEncoder(w).Encode(map[string]string{
+				"message": config.LangConfig{}.I18n()["store_failed"],
+			})
+			return
 		}
 		dReceipt, err := rh.Rs.Find(rpt.ID)
 		w.WriteHeader(http.StatusOK)
