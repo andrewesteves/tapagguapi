@@ -177,9 +177,23 @@ func (r ReceiptPostgresRepository) Update(receipt model.Receipt) (model.Receipt,
 	if err != nil {
 		return model.Receipt{}, err
 	}
+
 	if rcpt.ID < 1 {
 		return model.Receipt{}, errors.New("Cant't find this receipt id")
 	}
+
+	companyRepo := NewCompanyPostgresRepository(r.Conn)
+	receipt.Company, err = companyRepo.Update(receipt.Company)
+	if err != nil {
+		return model.Receipt{}, err
+	}
+
+	categoryRepo := NewCategoryPostgresRepository(r.Conn)
+	receipt.Category, err = categoryRepo.Update(receipt.Category)
+	if err != nil {
+		return model.Receipt{}, err
+	}
+
 	rs, err := r.Conn.Prepare("UPDATE receipts SET title = $1, tax = $2, discount = $3, extra = $4, total = $5, url = $6, access_key = $7, issued_at = $8, updated_at = now() WHERE id = $9")
 	if err != nil {
 		return model.Receipt{}, err
