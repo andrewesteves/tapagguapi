@@ -122,6 +122,7 @@ func (rh ReceiptHTTPHandler) Update() http.HandlerFunc {
 		reqBody, _ := ioutil.ReadAll(r.Body)
 		json.Unmarshal(reqBody, &receipt)
 		receipt.ID = int64(id)
+		receipt.User = *middleware.GetUser(r.Context())
 		receipt, err = rh.Rs.Update(receipt)
 		if err != nil {
 			panic(err.Error())

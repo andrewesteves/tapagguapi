@@ -108,29 +108,38 @@ func (r ReceiptPostgresRepository) Store(receipt model.Receipt) (model.Receipt, 
 	receipt.Category.User = receipt.User
 
 	companyRepo := NewCompanyPostgresRepository(r.Conn)
-	company, err = companyRepo.FindBy(receipt.Company, "title", receipt.Company.Title)
-	if company.Title == "" {
-		receipt.Company, err = companyRepo.Store(receipt.Company)
+	if receipt.Company.ID > 0 {
+		receipt.Company, err = companyRepo.Update(receipt.Company)
 		if err != nil {
 			return model.Receipt{}, err
 		}
 	} else {
-		receipt.Company.ID = company.ID
+		company, err = companyRepo.FindBy(receipt.Company, "title", receipt.Company.Title)
+		if company.Title == "" {
+			receipt.Company, err = companyRepo.Store(receipt.Company)
+			if err != nil {
+				return model.Receipt{}, err
+			}
+		} else {
+			receipt.Company.ID = company.ID
+		}
 	}
 
-	categoryRepo := NewCategoryPostgresRepository(r.Conn)
-	category, err = categoryRepo.FindBy(receipt.Category, "title", receipt.Category.Title)
-	if category.Title == "" {
-		receipt.Category, err = categoryRepo.Store(model.Category{
-			User:  receipt.User,
-			Title: receipt.Category.Title,
-			Icon:  receipt.Category.Icon,
-		})
-		if err != nil {
-			return model.Receipt{}, err
+	if receipt.Category.ID < 1 {
+		categoryRepo := NewCategoryPostgresRepository(r.Conn)
+		category, err = categoryRepo.FindBy(receipt.Category, "title", receipt.Category.Title)
+		if category.Title == "" {
+			receipt.Category, err = categoryRepo.Store(model.Category{
+				User:  receipt.User,
+				Title: receipt.Category.Title,
+				Icon:  receipt.Category.Icon,
+			})
+			if err != nil {
+				return model.Receipt{}, err
+			}
+		} else {
+			receipt.Category.ID = category.ID
 		}
-	} else {
-		receipt.Category.ID = category.ID
 	}
 
 	err = r.Conn.QueryRow("INSERT INTO receipts (category_id, company_id, user_id, title, tax, discount, extra, total, url, access_key, issued_at, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,now(),now()) RETURNING id", receipt.Category.ID, receipt.Company.ID, receipt.User.ID, receipt.Title, receipt.Tax, receipt.Discount, receipt.Extra, receipt.Total, receipt.URL, receipt.AccessKey, receipt.IssuedAt).Scan(&lastInsertID)
@@ -182,23 +191,17 @@ func (r ReceiptPostgresRepository) Update(receipt model.Receipt) (model.Receipt,
 		return model.Receipt{}, errors.New("Cant't find this receipt id")
 	}
 
-	companyRepo := NewCompanyPostgresRepository(r.Conn)
-	receipt.Company, err = companyRepo.Update(receipt.Company)
-	if err != nil {
-		return model.Receipt{}, err
-	}
+	rcpt.User = receipt.User
+	rcpt.Title = receipt.Title
+	rcpt.Category = receipt.Category
+	rcpt.Company.Title = receipt.Company.Title
+	rcpt.Total = receipt.Total
 
-	categoryRepo := NewCategoryPostgresRepository(r.Conn)
-	receipt.Category, err = categoryRepo.Update(receipt.Category)
+	_, err = r.Destroy(receipt.ID)
+	receipt, err = r.Store(rcpt)
 	if err != nil {
 		return model.Receipt{}, err
 	}
-
-	rs, err := r.Conn.Prepare("UPDATE receipts SET title = $1, tax = $2, discount = $3, extra = $4, total = $5, url = $6, access_key = $7, issued_at = $8, updated_at = now() WHERE id = $9")
-	if err != nil {
-		return model.Receipt{}, err
-	}
-	rs.Exec(receipt.Title, receipt.Tax, receipt.Discount, receipt.Extra, receipt.Total, receipt.URL, receipt.AccessKey, receipt.IssuedAt, receipt.ID)
 	return receipt, nil
 }
 
